@@ -43,7 +43,8 @@ RSpec.configure do |config|
       pidfile:    redis_pidfile
     }
     redis = support_dir.join('redis-server')
-    system "#{redis} #{options_hash_to_string(redis_options)}"
+    # TODO: Redis should be started here unless Rspec is executed by Travis CI
+    # system "#{redis} #{options_hash_to_string(redis_options)}"
 
     # Start Sidekiq
     sidekiq_options = {
@@ -68,11 +69,12 @@ RSpec.configure do |config|
 
     # Stop Redis
     redis_cli = support_dir.join('redis-cli')
-    system "#{redis_cli} -p #{redis_port} shutdown"
-    while File.exist?(redis_pidfile)
-      puts 'Waiting for Redis to shut down...'
-      sleep 1
-    end
+    # TODO: Redis should be stopped here unless Rspec is executed by Travis CI
+    # system "#{redis_cli} -p #{redis_port} shutdown"
+    # while File.exist?(redis_pidfile)
+    #   puts 'Waiting for Redis to shut down...'
+    #   sleep 1
+    # end
 
     # Truncate log files
     max_len = 1024 * 1024 # 1 MB
