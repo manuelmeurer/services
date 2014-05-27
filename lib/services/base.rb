@@ -39,7 +39,7 @@ module Services
         raise 'Array can only contain IDs.' if ids_or_objects.any? { |ids_or_object| !ids_or_object.is_a?(Fixnum) }
         objects = "Services::#{klass.to_s.pluralize}::Find".constantize.call(ids_or_objects)
         missing_ids = ids_or_objects - objects.pluck(:id)
-        raise self.class::Error, "#{klass.to_s.pluralize(missing_ids)} #{missing_ids.join(', ')} not found." if missing_ids.present?
+        raise self.class::Error, "#{klass.to_s.pluralize(missing_ids)} #{missing_ids.join(', ')} not found." if missing_ids.size > 0
         return objects
       when Fixnum
         object = "Services::#{klass.to_s.pluralize}::Find".constantize.call(ids_or_objects).first
