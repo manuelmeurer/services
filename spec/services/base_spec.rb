@@ -64,12 +64,24 @@ describe Services::Base do
   end
 
   context 'checking for uniqueness' do
-    it 'raises an error when the same job is executed twice' do
-      LongRunningService.perform_async
-      sleep 0.5 # Wait for Sidekiq to start processing the job
-      expect do
-        LongRunningService.call
-      end.to raise_error(LongRunningService::NotUniqueError)
+    context 'when the service was set to check for uniqueness' do
+      it 'raises an error when the same job is executed twice' do
+        UniqueService.perform_async
+        sleep 0.5 # Wait for Sidekiq to start processing the job
+        expect do
+          UniqueService.call
+        end.to raise_error(UniqueService::NotUniqueError)
+      end
+    end
+
+    context 'when the service was not set to check for uniqueness' do
+      it 'does not raise an error when the same job is executed twice' do
+        NonUniqueService.perform_async
+        sleep 0.5 # Wait for Sidekiq to start processing the job
+        expect do
+          NonUniqueService.call
+        end.to_not raise_error
+      end
     end
   end
 end

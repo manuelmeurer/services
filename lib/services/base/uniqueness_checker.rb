@@ -2,20 +2,33 @@ module Services
   class Base
     module UniquenessChecker
       def self.prepended(mod)
+        mod.instance_eval do
+          def check_uniqueness?
+            @check_uniqueness
+          end
+
+          def check_uniqueness!
+            @check_uniqueness = true
+          end
+        end
         mod.const_set :NotUniqueError, Class.new(mod::Error)
       end
 
       def call(*args)
-        key = unique_key(args)
-        if Services.configuration.redis.exists(key)
-          raise self.class::NotUniqueError
-        else
-          Services.configuration.redis.setex key, 60 * 60, Time.now
-          begin
-            super
-          ensure
-            Services.configuration.redis.del key
+        if self.class.check_uniqueness?
+          key = unique_key(args)
+          if Services.configuration.redis.exists(key)
+            raise self.class::NotUniqueError
+          else
+            Services.configuration.redis.setex key, 60 * 60, Time.now
+            begin
+              super
+            ensure
+              Services.configuration.redis.del key
+            end
           end
+        else
+          super
         end
       end
 
