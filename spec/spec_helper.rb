@@ -32,7 +32,7 @@ RSpec.configure do |config|
   config.filter_run :focus
   config.order = 'random'
 
-  config.before :all do
+  config.before :suite do
     # Start Redis
     redis_options = {
       daemonize:  'yes',
@@ -59,7 +59,7 @@ RSpec.configure do |config|
     system "bundle exec sidekiq #{options_hash_to_string(sidekiq_options)}"
   end
 
-  config.after :all do
+  config.after :suite do
     # Stop Sidekiq
     system "bundle exec sidekiqctl stop #{sidekiq_pidfile} #{sidekiq_timeout}"
     while File.exist?(sidekiq_pidfile)
