@@ -56,7 +56,7 @@ module Services
 
     def controller
       @controller ||= begin
-        raise 'Please configure host.' unless Services.configuration.host?
+        raise 'Please configure host.' if Services.configuration.host.nil?
         request = ActionDispatch::TestRequest.new
         request.host = Services.configuration.host
         ActionController::Base.new.tap do |controller|
