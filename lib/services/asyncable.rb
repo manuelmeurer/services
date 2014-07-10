@@ -58,7 +58,7 @@ module Services
       @own_worker = if self.jid.nil?
         nil
       else
-        own_worker = Sidekiq::Workers.new.detect do |_, work, _|
+        own_worker = Sidekiq::Workers.new.detect do |_, _, work|
           work['payload']['jid'] == self.jid
         end
         raise self.class::Error, "Could not find own worker with jid #{self.jid}: #{Sidekiq::Workers.new.map{ |*args| args }}" if own_worker.nil?
@@ -67,7 +67,7 @@ module Services
     end
 
     def sibling_workers
-      @sibling_workers ||= Sidekiq::Workers.new.select do |_, work, _|
+      @sibling_workers ||= Sidekiq::Workers.new.select do |_, _, work|
         work['payload']['class'] == self.class.to_s && (own_worker.nil? || work['payload']['jid'] != own_worker[1]['payload']['jid'])
       end
     end
