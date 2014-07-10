@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.email         = 'manuel@krautcomputing.com'
   gem.summary       = ''
   gem.description   = ''
-  gem.homepage      = ''
+  gem.homepage      = 'http://krautcomputing.github.io/services'
   gem.license       = 'MIT'
 
   gem.files         = `git ls-files`.split($/)
