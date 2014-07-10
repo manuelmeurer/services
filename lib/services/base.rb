@@ -7,7 +7,7 @@ module Services
   class Base
     class << self
       def inherited(subclass)
-        subclass.const_set :Error, Class.new(Nesty::NestedStandardError)
+        subclass.const_set :Error, Class.new(StandardError)
         subclass.send :include, Rails.application.routes.url_helpers if defined?(Rails)
         subclass.send :include, Asyncable if defined?(Asyncable)
         subclass.send :prepend, CallLogger, ExceptionWrapper, UniquenessChecker
