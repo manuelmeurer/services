@@ -1,4 +1,3 @@
-require 'nesty'
 require 'securerandom'
 require 'action_dispatch'
 require 'digest'
