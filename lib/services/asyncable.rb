@@ -61,7 +61,7 @@ module Services
         own_worker = Sidekiq::Workers.new.detect do |_, _, work|
           work['payload']['jid'] == self.jid
         end
-        raise self.class::Error, "Could not find own worker with jid #{self.jid}: #{Sidekiq::Workers.new.map{ |*args| args }}" if own_worker.nil?
+        raise self.class::Error, "Could not find own worker with jid #{self.jid}: #{Sidekiq::Workers.new.map { |*args| args }}" if own_worker.nil?
         own_worker
       end
     end
