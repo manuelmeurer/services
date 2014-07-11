@@ -12,7 +12,7 @@ redis_pidfile = support_dir.join('redis.pid')
 redis_url     = "redis://localhost:#{redis_port}/0"
 
 sidekiq_pidfile = support_dir.join('sidekiq.pid')
-sidekiq_timeout = 60
+sidekiq_timeout = 20
 
 Services.configure do |config|
   config.redis   = Redis.new
