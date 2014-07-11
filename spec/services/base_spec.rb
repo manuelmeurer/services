@@ -69,27 +69,21 @@ describe Services::Base do
     context 'when the service was set to check for uniqueness' do
       it 'raises an error when the same job is executed twice' do
         wait_for_job_to_run UniqueService.perform_async
-        expect do
-          UniqueService.call
-        end.to raise_error(UniqueService::NotUniqueError)
+        expect { UniqueService.call }.to raise_error(UniqueService::NotUniqueError)
       end
     end
 
     context 'when the service was not set to check for uniqueness' do
       it 'does not raise an error when the same job is executed twice' do
         wait_for_job_to_run NonUniqueService.perform_async
-        expect do
-          NonUniqueService.call
-        end.to_not raise_error
+        expect { NonUniqueService.call }.to_not raise_error
       end
     end
   end
 
   context 'when executed asynchronously' do
     it 'finds its own worker' do
-      3.times do
-        OwnWorkerService.perform_async
-      end
+      3.times { OwnWorkerService.perform_async }
       jid = OwnWorkerService.perform_async
       own_worker_data = wait_for { Services.configuration.redis.get(jid) }
       own_worker_json = JSON.parse(own_worker_data)
@@ -97,16 +91,12 @@ describe Services::Base do
     end
 
     it 'finds its sibling workers' do
-      sibling_worker_jids = (1..3).map do
-        SiblingWorkersService.perform_async
-      end
+      sibling_worker_jids = (1..3).map { SiblingWorkersService.perform_async }
       jid = SiblingWorkersService.perform_async
       sibling_worker_data = wait_for { Services.configuration.redis.get(jid) }
       sibling_worker_json = JSON.parse(sibling_worker_data)
       expect(sibling_worker_json.size).to eq(3)
-      expected_sibling_worker_jids = sibling_worker_json.map do |_, _, work|
-        work['payload']['jid']
-      end
+      expected_sibling_worker_jids = sibling_worker_json.map { |_, _, work| work['payload']['jid'] }
       expect(expected_sibling_worker_jids).to match_array(sibling_worker_jids)
     end
   end
