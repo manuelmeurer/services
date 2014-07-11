@@ -1,8 +1,10 @@
 require 'rspec'
+require 'tries'
 require 'redis'
 require 'sidekiq'
 require_relative '../lib/services'
 require_relative 'support/test_services'
+require_relative 'support/helpers'
 
 support_dir = Pathname.new(File.expand_path('../support', __FILE__))
 log_dir     = support_dir.join('logs')
@@ -48,7 +50,7 @@ RSpec.configure do |config|
 
     # Start Sidekiq
     sidekiq_options = {
-      concurrency: 1,
+      concurrency: 10,
       daemon:      true,
       timeout:     sidekiq_timeout,
       verbose:     true,

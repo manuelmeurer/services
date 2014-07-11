@@ -2,6 +2,7 @@ require 'active_support/concern'
 
 begin
   require 'sidekiq'
+  require 'sidekiq/api'
 rescue LoadError
   raise Services::BackgroundProcessorNotFound
 end
@@ -68,7 +69,7 @@ module Services
 
     def sibling_workers
       @sibling_workers ||= Sidekiq::Workers.new.select do |_, _, work|
-        work['payload']['class'] == self.class.to_s && (own_worker.nil? || work['payload']['jid'] != own_worker[1]['payload']['jid'])
+        work['payload']['class'] == self.class.to_s && (own_worker.nil? || work['payload']['jid'] != own_worker[2]['payload']['jid'])
       end
     end
   end
