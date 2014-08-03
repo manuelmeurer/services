@@ -8,8 +8,15 @@ module Services
           result = super
         rescue StandardError => e
           log "#{e.class}: #{e.message}"
-          e.backtrace.each do |line|
-            log line
+          if e.respond_to?(:cause) && !e.cause.nil?
+            log "caused by: #{e.cause.class}: #{e.cause.message}"
+            e.cause.backtrace.each do |line|
+              log line
+            end
+          else
+            e.backtrace.each do |line|
+              log line
+            end
           end
           raise e
         ensure
