@@ -18,8 +18,8 @@ begin
   require_relative 'services/asyncable'
 rescue Services::BackgroundProcessorNotFound
 end
-require_relative 'services/base/call_logger'
-require_relative 'services/base/exception_wrapper'
-require_relative 'services/base/uniqueness_checker'
+require_relative 'services/modules/call_logger'
+require_relative 'services/modules/exception_wrapper'
+require_relative 'services/modules/uniqueness_checker'
 require_relative 'services/base'
 require_relative 'services/railtie' if defined?(Rails)
