@@ -66,10 +66,18 @@ describe Services::Base do
   end
 
   context 'checking for uniqueness' do
-    context 'when the service was set to check for uniqueness' do
+    context 'when the service was set to check for uniqueness with the default args' do
       it 'raises an error when the same job is executed twice' do
         wait_for_job_to_run UniqueService.perform_async
         expect { UniqueService.call }.to raise_error(UniqueService::NotUniqueError)
+      end
+    end
+
+    context 'when the service was set to check for uniqueness with custom args' do
+      it 'raises an error when a job with the same custom args is executed twice' do
+        wait_for_job_to_run UniqueWithCustomArgsService.perform_async('foo', 'bar', 'baz')
+        expect { UniqueWithCustomArgsService.call('foo', 'bar', 'pelle') }.to raise_error(UniqueWithCustomArgsService::NotUniqueError)
+        expect { UniqueWithCustomArgsService.call('foo', 'baz', 'pelle') }.to_not raise_error
       end
     end
 

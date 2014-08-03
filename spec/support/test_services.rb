@@ -1,7 +1,13 @@
 class UniqueService < Services::Base
-  check_uniqueness!
-
   def call
+    check_uniqueness!
+    sleep 0.5
+  end
+end
+
+class UniqueWithCustomArgsService < Services::Base
+  def call(uniqueness_arg1, uniqueness_arg2, ignore_arg)
+    check_uniqueness! uniqueness_arg1, uniqueness_arg2
     sleep 0.5
   end
 end
