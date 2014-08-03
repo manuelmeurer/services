@@ -7,7 +7,7 @@ require_relative 'support/test_services'
 require_relative 'support/helpers'
 
 support_dir = Pathname.new(File.expand_path('../support', __FILE__))
-log_dir     = support_dir.join('logs')
+log_dir     = support_dir.join('log')
 
 redis_port    = 6379
 redis_pidfile = support_dir.join('redis.pid')
