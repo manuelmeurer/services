@@ -89,6 +89,22 @@ describe Services::Base do
     end
   end
 
+  context 'logging exceptions' do
+    if RUBY_VERSION > '2.1'
+      it 'logs the exception cause(s) as well' do
+        service = NestedExceptionService.new
+        logs = []
+        allow(service).to receive(:log) do |message, *|
+          logs << message
+        end
+        expect { service.call }.to raise_error(NestedExceptionService::Error)
+        %w(NestedError1 NestedError2).each do |error|
+          expect(logs).to include(/\Acaused by: NestedExceptionService::#{error}/)
+        end
+      end
+    end
+  end
+
   context 'when executed asynchronously' do
     it 'finds its own worker' do
       3.times { OwnWorkerService.perform_async }

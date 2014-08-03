@@ -39,3 +39,20 @@ class SiblingWorkersService < Services::Base
     sleep 0.5
   end
 end
+
+class NestedExceptionService < Services::Base
+  NestedError1 = Class.new(Error)
+  NestedError2 = Class.new(Error)
+
+  def call
+    begin
+      begin
+        raise NestedError2
+      rescue NestedError2
+        raise NestedError1
+      end
+    rescue NestedError1
+      raise Error
+    end
+  end
+end

@@ -17,7 +17,6 @@ module Services
 
     def initialize
       @id = SecureRandom.hex(6)
-      @logger = Logger.new
     end
 
     def call(*args)
@@ -47,10 +46,6 @@ module Services
       else
         raise "Unexpected ids_or_objects class: #{ids_or_objects.class}"
       end
-    end
-
-    def log(message, severity = :info)
-      @logger.log [self.class, @id], message, severity
     end
 
     def controller
