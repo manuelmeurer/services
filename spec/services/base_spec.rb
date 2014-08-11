@@ -1,18 +1,41 @@
 require 'spec_helper'
 
 describe Services::Base do
-  class ServiceWithError < Services::Base
-    def call
-      raise Error.new('I am a service error.')
+  describe '#find_objects' do
+    let(:objects) { (1..5).to_a.shuffle.map { |id| Model.new(id) } }
+
+    context 'when passing in objects' do
+      it 'returns the same objects' do
+        expect(Services::Models::FindObjectsTest.call(objects)).to eq(objects)
+      end
+    end
+
+    context 'when passing in IDs' do
+      it 'returns the objects for the IDs' do
+        expect(Services::Models::FindObjectsTest.call(objects.map(&:id))).to eq(objects)
+      end
+    end
+
+    context 'when passing in objects and IDs' do
+      it 'returns the objects plus the objects for the IDs' do
+        objects_as_objects, objects_as_ids = objects.partition do |object|
+          rand(2) == 1
+        end
+
+        expect(
+          Services::Models::FindObjectsTest.call(objects_as_objects + objects_as_ids.map(&:id))
+        ).to eq(objects_as_objects + objects_as_ids)
+      end
     end
   end
-  if ServiceWithError::Error.new.respond_to?(:cause)
+
+  if StandardError.new.respond_to?(:cause)
     context 'wrapping exceptions' do
       it 'does not wrap service errors or subclasses' do
         expect do
-          ServiceWithError.call
+          ErrorService.call
         end.to raise_error do |error|
-          expect(error).to be_a(ServiceWithError::Error)
+          expect(error).to be_a(ErrorService::Error)
           expect(error.message).to eq('I am a service error.')
           expect(error.cause).to be_nil
         end

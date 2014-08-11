@@ -25,28 +25,31 @@ module Services
 
     private
 
-    def find_object(ids_or_objects, klass = nil)
+    def find_objects(ids_or_objects, klass = nil)
       if klass.nil?
         klass = self.class.to_s[/Services::([^:]+)/, 1].singularize.constantize rescue nil
         raise "Could not determine class from #{self.class}" if klass.nil?
       end
-      case ids_or_objects
-      when klass
-        return ids_or_objects
-      when Array
-        raise 'Array can only contain IDs.' if ids_or_objects.any? { |ids_or_object| !ids_or_object.is_a?(Fixnum) }
-        objects = "Services::#{klass.to_s.pluralize}::Find".constantize.call(ids_or_objects)
-        missing_ids = ids_or_objects - objects.pluck(:id)
-        raise self.class::Error, "#{klass.to_s.pluralize(missing_ids)} #{missing_ids.join(', ')} not found." if missing_ids.size > 0
-        return objects
-      when Fixnum
-        object = "Services::#{klass.to_s.pluralize}::Find".constantize.call(ids_or_objects).first
-        raise self.class::Error, "#{klass} #{ids_or_objects} not found." if object.nil?
-        return object
-      else
-        raise "Unexpected ids_or_objects class: #{ids_or_objects.class}"
+      ids_or_objects = Array(ids_or_objects)
+      ids, objects = ids_or_objects.grep(Fixnum), ids_or_objects.grep(klass)
+      if ids.size + objects.size < ids_or_objects.size
+        raise "All params must be either #{klass.to_s.pluralize} or Fixnums: #{ids_or_objects.map(&:class)}"
       end
+      if ids.any?
+        find_service = "Services::#{klass.to_s.pluralize}::Find"
+        objects_from_ids = find_service.constantize.call(ids)
+        object_ids = if objects_from_ids.respond_to?(:pluck)
+          objects_from_ids.pluck(:id)
+        else
+          objects_from_ids.map(&:id)
+        end
+        missing_ids = ids - object_ids
+        raise self.class::Error, "#{klass.to_s.pluralize(missing_ids)} #{missing_ids.join(', ')} not found." if missing_ids.size > 0
+        objects.concat objects_from_ids
+      end
+      objects
     end
+    alias_method :find_object, :find_objects
 
     def controller
       @controller ||= begin

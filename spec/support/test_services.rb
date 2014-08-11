@@ -1,3 +1,48 @@
+class Model
+  attr_reader :id
+
+  def initialize(id)
+    @id = id
+    ModelRepository.add self
+  end
+end
+
+class ModelRepository
+  def self.add(model)
+    @models ||= []
+    @models << model
+  end
+
+  def self.find(id)
+    return nil unless defined?(@models)
+    @models.detect do |model|
+      model.id == id
+    end
+  end
+end
+
+module Services
+  module Models
+    class Find < Services::Base
+      def call(ids)
+        ids.map { |id| ModelRepository.find id }.compact
+      end
+    end
+
+    class FindObjectsTest < Services::Base
+      def call(ids_or_objects)
+        find_objects ids_or_objects
+      end
+    end
+  end
+end
+
+class ErrorService < Services::Base
+  def call
+    raise Error.new('I am a service error.')
+  end
+end
+
 class UniqueService < Services::Base
   def call
     check_uniqueness!
