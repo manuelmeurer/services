@@ -28,6 +28,15 @@ describe Services::Base do
         expect(Services::Models::FindObjectsTest.call(objects_and_ids)).to eq(only_objects)
       end
     end
+
+    context 'when passing in a single object or ID' do
+      it 'returns a single object' do
+        object = objects.sample
+        [object.id, object].each do |id_or_object|
+          expect(Services::Models::FindObjectsTest.call(id_or_object)).to eq(object)
+        end
+      end
+    end
   end
 
   if StandardError.new.respond_to?(:cause)

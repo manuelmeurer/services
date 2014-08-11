@@ -30,10 +30,10 @@ module Services
         klass = self.class.to_s[/Services::([^:]+)/, 1].singularize.constantize rescue nil
         raise "Could not determine class from #{self.class}" if klass.nil?
       end
-      ids_or_objects = Array(ids_or_objects)
-      ids, objects = ids_or_objects.grep(Fixnum), ids_or_objects.grep(klass)
-      if ids.size + objects.size < ids_or_objects.size
-        raise "All params must be either #{klass.to_s.pluralize} or Fixnums: #{ids_or_objects.map(&:class)}"
+      ids_or_objects_array = Array(ids_or_objects)
+      ids, objects = ids_or_objects_array.grep(Fixnum), ids_or_objects_array.grep(klass)
+      if ids.size + objects.size < ids_or_objects_array.size
+        raise "All params must be either #{klass.to_s.pluralize} or Fixnums: #{ids_or_objects_array.map(&:class)}"
       end
       if ids.any?
         find_service = "Services::#{klass.to_s.pluralize}::Find"
@@ -47,7 +47,7 @@ module Services
         raise self.class::Error, "#{klass.to_s.pluralize(missing_ids)} #{missing_ids.join(', ')} not found." if missing_ids.size > 0
         objects.concat objects_from_ids
       end
-      objects
+      ids_or_objects.is_a?(Array) ? objects : objects.first
     end
     alias_method :find_object, :find_objects
 
