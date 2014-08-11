@@ -5,6 +5,10 @@ class Model
     @id = id
     ModelRepository.add self
   end
+
+  def ==(another_model)
+    self.id == another_model.id
+  end
 end
 
 class ModelRepository

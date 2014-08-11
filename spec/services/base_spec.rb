@@ -22,9 +22,10 @@ describe Services::Base do
           rand(2) == 1
         end
 
-        expect(
-          Services::Models::FindObjectsTest.call(objects_as_objects + objects_as_ids.map(&:id))
-        ).to eq(objects_as_objects + objects_as_ids)
+        objects_and_ids = objects_as_objects + objects_as_ids.map(&:id)
+        only_objects = objects_as_objects + objects_as_ids
+
+        expect(Services::Models::FindObjectsTest.call(objects_and_ids)).to eq(only_objects)
       end
     end
   end
