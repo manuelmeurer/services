@@ -8,10 +8,21 @@ def wait_for(&block)
   end
 end
 
-def wait_for_job_to_run(jid)
-  wait_for do
-    Sidekiq::Workers.new.any? do |_, _, work|
-      work['payload']['jid'] == jid
-    end
+def worker_with_jid(jid)
+  Sidekiq::Workers.new.detect do |_, _, work|
+    work['payload']['jid'] == jid
+  end
+end
+
+def wait_for_job_to_run(job_class, *args, &block)
+  job_class.perform_async(*args).tap do |jid|
+    wait_for { worker_with_jid(jid) }
+    block.call if block_given?
+  end
+end
+
+def wait_for_job_to_run_and_finish(job_class, *args, &block)
+  wait_for_job_to_run(job_class, *args, &block).tap do |jid|
+    wait_for { worker_with_jid(jid).nil? }
   end
 end

@@ -118,25 +118,54 @@ describe Services::Base do
   end
 
   context 'checking for uniqueness' do
-    context 'when the service was set to check for uniqueness with the default args' do
+    context 'when the service checks for uniqueness with the default args' do
       it 'raises an error when the same job is executed twice' do
-        wait_for_job_to_run UniqueService.perform_async
-        expect { UniqueService.call }.to raise_error(UniqueService::NotUniqueError)
+        wait_for_job_to_run UniqueService do
+          expect { UniqueService.call }.to raise_error(UniqueService::NotUniqueError)
+        end
       end
     end
 
-    context 'when the service was set to check for uniqueness with custom args' do
+    context 'when the service checks for uniqueness with custom args' do
       it 'raises an error when a job with the same custom args is executed twice' do
-        wait_for_job_to_run UniqueWithCustomArgsService.perform_async('foo', 'bar', 'baz')
-        expect { UniqueWithCustomArgsService.call('foo', 'bar', 'pelle') }.to raise_error(UniqueWithCustomArgsService::NotUniqueError)
-        expect { UniqueWithCustomArgsService.call('foo', 'baz', 'pelle') }.to_not raise_error
+        wait_for_job_to_run UniqueWithCustomArgsService, 'foo', 'bar', 'baz' do
+          expect { UniqueWithCustomArgsService.call('foo', 'bar', 'pelle') }.to raise_error(UniqueWithCustomArgsService::NotUniqueError)
+          expect { UniqueWithCustomArgsService.call('foo', 'baz', 'pelle') }.to_not raise_error
+        end
+      end
+    end
+
+    context 'when the service checks for uniqueness multiple times' do
+      let(:args) { %w(foo bar baz) }
+
+      it 'raises an error when one of the checks fails' do
+        wait_for_job_to_run UniqueMultipleService, *args do
+          args.each do |arg|
+            expect { UniqueMultipleService.call(arg) }.to raise_error(UniqueMultipleService::NotUniqueError)
+          end
+          expect { UniqueMultipleService.call('pelle') }.to_not raise_error
+        end
+      end
+
+      it 'does not leave any Redis keys behind' do
+        expect do
+          wait_for_job_to_run_and_finish UniqueMultipleService, *args do
+            args.each do |arg|
+              UniqueMultipleService.call(arg) rescue nil
+            end
+            UniqueMultipleService.call('pelle')
+          end
+        end.to_not change {
+          Services.configuration.redis.keys("*#{Services::Base::UniquenessChecker::KEY_PREFIX}*").count
+        }
       end
     end
 
     context 'when the service was not set to check for uniqueness' do
       it 'does not raise an error when the same job is executed twice' do
-        wait_for_job_to_run NonUniqueService.perform_async
-        expect { NonUniqueService.call }.to_not raise_error
+        wait_for_job_to_run NonUniqueService do
+          expect { NonUniqueService.call }.to_not raise_error
+        end
       end
     end
   end

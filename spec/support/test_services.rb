@@ -67,6 +67,15 @@ class UniqueWithCustomArgsService < Services::Base
   end
 end
 
+class UniqueMultipleService < Services::Base
+  def call(*args)
+    args.each do |arg|
+      check_uniqueness! arg
+    end
+    sleep 0.5
+  end
+end
+
 class NonUniqueService < Services::Base
   def call
     sleep 0.5
