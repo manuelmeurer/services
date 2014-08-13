@@ -35,18 +35,19 @@ RSpec.configure do |config|
   config.order = 'random'
 
   config.before :suite do
-    # Start Redis
-    redis_options = {
-      daemonize:  'yes',
-      port:       redis_port,
-      dir:        support_dir,
-      dbfilename: 'redis.rdb',
-      logfile:    log_dir.join('redis.log'),
-      pidfile:    redis_pidfile
-    }
-    redis = support_dir.join('redis-server')
-    # TODO: Redis should be started here unless Rspec is executed by Travis CI
-    # system "#{redis} #{options_hash_to_string(redis_options)}"
+    unless ENV['TRAVIS']
+      # Start Redis
+      redis_options = {
+        daemonize:  'yes',
+        port:       redis_port,
+        dir:        support_dir,
+        dbfilename: 'redis.rdb',
+        logfile:    log_dir.join('redis.log'),
+        pidfile:    redis_pidfile
+      }
+      redis = support_dir.join('redis-server')
+      system "#{redis} #{options_hash_to_string(redis_options)}"
+    end
 
     # Start Sidekiq
     sidekiq_options = {
@@ -69,14 +70,15 @@ RSpec.configure do |config|
       sleep 1
     end
 
-    # Stop Redis
-    redis_cli = support_dir.join('redis-cli')
-    # TODO: Redis should be stopped here unless Rspec is executed by Travis CI
-    # system "#{redis_cli} -p #{redis_port} shutdown"
-    # while File.exist?(redis_pidfile)
-    #   puts 'Waiting for Redis to shut down...'
-    #   sleep 1
-    # end
+    unless ENV['TRAVIS']
+      # Stop Redis
+      redis_cli = support_dir.join('redis-cli')
+      system "#{redis_cli} -p #{redis_port} shutdown"
+      while File.exist?(redis_pidfile)
+        puts 'Waiting for Redis to shut down...'
+        sleep 1
+      end
+    end
 
     # Truncate log files
     max_len = 1024 * 1024 # 1 MB
