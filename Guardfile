@@ -1,4 +1,4 @@
-guard 'rspec', cmd: 'bundle exec rspec', failed_mode: :none, all_after_pass: true, all_on_start: true do
+guard 'rspec', cmd: 'bundle exec rspec' do
   # Specs
   watch(%r(^spec/.+_spec\.rb$))
   watch('spec/spec_helper.rb')       { 'spec' }
