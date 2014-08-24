@@ -15,13 +15,13 @@ module Services
           raise 'Could not find uniqueness args' unless defined?(@uniqueness_args)
           args = @uniqueness_args
         end
-        @uniqueness_keys ||= []
         new_uniqueness_key = uniqueness_key(args)
-        raise "A uniqueness key with args #{args.inspect} already exists." if @uniqueness_keys.include?(new_uniqueness_key)
-        @uniqueness_keys << new_uniqueness_key
         if similar_service_id = Services.configuration.redis.get(new_uniqueness_key)
           raise self.class::NotUniqueError, "Service #{self.class} with uniqueness args #{args} is not unique, a similar service is already running: #{similar_service_id}"
         else
+          @uniqueness_keys ||= []
+          raise "A uniqueness key with args #{args.inspect} already exists." if @uniqueness_keys.include?(new_uniqueness_key)
+          @uniqueness_keys << new_uniqueness_key
           Services.configuration.redis.setex new_uniqueness_key, 60 * 60, @id
         end
       end
@@ -30,7 +30,7 @@ module Services
         @uniqueness_args = args
         super
       ensure
-        Services.configuration.redis.del @uniqueness_keys if defined?(@uniqueness_keys)
+        Services.configuration.redis.del @uniqueness_keys unless @uniqueness_keys.nil? || @uniqueness_keys.empty?
       end
 
       private

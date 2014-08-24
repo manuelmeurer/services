@@ -119,17 +119,21 @@ describe Services::Base do
 
   context 'checking for uniqueness' do
     context 'when the service checks for uniqueness with the default args' do
-      it 'raises an error when the same job is executed twice' do
+      it 'raises an error when the same job is executed multiple times' do
         wait_for_job_to_run UniqueService do
-          expect { UniqueService.call }.to raise_error(UniqueService::NotUniqueError)
+          3.times do
+            expect { UniqueService.call }.to raise_error(UniqueService::NotUniqueError)
+          end
         end
       end
     end
 
     context 'when the service checks for uniqueness with custom args' do
-      it 'raises an error when a job with the same custom args is executed twice' do
+      it 'raises an error when a job with the same custom args is executed multiple times' do
         wait_for_job_to_run UniqueWithCustomArgsService, 'foo', 'bar', 'baz' do
-          expect { UniqueWithCustomArgsService.call('foo', 'bar', 'pelle') }.to raise_error(UniqueWithCustomArgsService::NotUniqueError)
+          3.times do
+            expect { UniqueWithCustomArgsService.call('foo', 'bar', 'pelle') }.to raise_error(UniqueWithCustomArgsService::NotUniqueError)
+          end
           expect { UniqueWithCustomArgsService.call('foo', 'baz', 'pelle') }.to_not raise_error
         end
       end
@@ -141,7 +145,9 @@ describe Services::Base do
       it 'raises an error when one of the checks fails' do
         wait_for_job_to_run UniqueMultipleService, *args do
           args.each do |arg|
-            expect { UniqueMultipleService.call(arg) }.to raise_error(UniqueMultipleService::NotUniqueError)
+            3.times do
+              expect { UniqueMultipleService.call(arg) }.to raise_error(UniqueMultipleService::NotUniqueError)
+            end
           end
           expect { UniqueMultipleService.call('pelle') }.to_not raise_error
         end
