@@ -47,9 +47,20 @@ module Services
   end
 end
 
+class EmptyService < Services::Base
+  def call(*args)
+  end
+end
+
 class ErrorService < Services::Base
   def call
     raise Error.new('I am a service error.')
+  end
+end
+
+class ServiceCallingService < Services::Base
+  def call(service)
+    service.call
   end
 end
 

@@ -2,9 +2,14 @@ require 'rspec'
 require 'tries'
 require 'redis'
 require 'sidekiq'
+
 require_relative '../lib/services'
-require_relative 'support/test_services'
 require_relative 'support/helpers'
+
+SERVICES_PATH = File.join('support', 'test_services.rb')
+require_relative SERVICES_PATH
+
+PROJECT_ROOT = Pathname.new(File.expand_path('..', __FILE__))
 
 support_dir = Pathname.new(File.expand_path('../support', __FILE__))
 log_dir     = support_dir.join('log')

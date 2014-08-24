@@ -170,9 +170,41 @@ describe Services::Base do
     end
   end
 
-  context 'logging exceptions' do
+  context 'logging' do
+    it 'logs start with args and end with duration' do
+      service = EmptyService.new
+      logs = []
+      allow(service).to receive(:log) do |message, *|
+        logs << message
+      end
+      service.call 'foo', 'bar'
+      expect(logs.first).to eq('START with args ["foo", "bar"]')
+      expect(logs.last).to eq('END after 0.0 seconds')
+    end
+
+    it 'logs the caller' do
+      service_calling_service, called_service = ServiceCallingService.new, EmptyService.new
+      logs = []
+      allow(called_service).to receive(:log) do |message, *|
+        logs << message
+      end
+
+      # When Rails is not defined, the complete caller path should be logged
+      service_calling_service.call called_service
+      expect(logs).to include(/\ACALLED BY #{Regexp.escape(PROJECT_ROOT.join(SERVICES_PATH).to_s)}:\d+/)
+
+      # When Rails is defined, only the caller path relative to Rails.root is logged
+      class Rails
+        def self.root; PROJECT_ROOT; end
+      end
+      logs = []
+      service_calling_service.call called_service
+      expect(logs).to include(/\ACALLED BY #{Regexp.escape(SERVICES_PATH)}:\d+/)
+      Object.send :remove_const, :Rails
+    end
+
     if RUBY_VERSION > '2.1'
-      it 'logs the exception cause(s) as well' do
+      it 'logs exceptions and exception causes' do
         service = NestedExceptionService.new
         logs = []
         allow(service).to receive(:log) do |message, *|

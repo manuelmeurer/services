@@ -2,7 +2,8 @@ module Services
   class Base
     module CallLogger
       def call(*args)
-        log "START with args: #{args}"
+        log "START with args #{args}"
+        log "CALLED BY #{caller}"
         start = Time.now
         begin
           result = super
@@ -34,6 +35,13 @@ module Services
             log "  #{line}"
           end
         end
+      end
+
+      def caller
+        caller_location = caller_locations(2, 1).first
+        caller_path = caller_location.path
+        caller_path = caller_path.sub(%r(\A#{Regexp.escape Rails.root.to_s}/), '') if defined?(Rails)
+        [caller_path, caller_location.lineno].join(':')
       end
     end
   end
