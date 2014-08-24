@@ -24,7 +24,7 @@ module Services
 
       def log_exception(e, cause = false)
         log "#{'caused by: ' if cause}#{e.class}: #{e.message}"
-        if e.respond_to?(:cause) && !e.cause.nil?
+        if e.respond_to?(:cause) && e.cause
           e.backtrace.take(5).each do |line|
             log "  #{line}"
           end
