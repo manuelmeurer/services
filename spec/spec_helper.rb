@@ -4,15 +4,16 @@ require 'redis'
 require 'sidekiq'
 
 require_relative '../lib/services'
-require_relative 'support/helpers'
 
-SERVICES_PATH = File.join('support', 'test_services.rb')
-require_relative SERVICES_PATH
+PROJECT_ROOT       = Pathname.new(File.expand_path('../..', __FILE__))
+TEST_SERVICES_PATH = Pathname.new(File.join('spec', 'support', 'test_services.rb'))
+support_dir        = Pathname.new(File.expand_path('../support', __FILE__))
+log_dir            = support_dir.join('log')
 
-PROJECT_ROOT = Pathname.new(File.expand_path('..', __FILE__))
+CALL_PROXY_SOURCE      = support_dir.join('call_proxy.rb')
+CALL_PROXY_DESTINATION = PROJECT_ROOT.join('lib', 'services', 'call_proxy.rb')
 
-support_dir = Pathname.new(File.expand_path('../support', __FILE__))
-log_dir     = support_dir.join('log')
+Dir[support_dir.join('**', '*.rb')].each { |f| require f }
 
 redis_port    = 6379
 redis_pidfile = support_dir.join('redis.pid')
@@ -65,9 +66,15 @@ RSpec.configure do |config|
       pidfile:     sidekiq_pidfile
     }
     system "bundle exec sidekiq #{options_hash_to_string(sidekiq_options)}"
+
+    # Copy call proxy
+    FileUtils.cp CALL_PROXY_SOURCE, CALL_PROXY_DESTINATION
   end
 
   config.after :suite do
+    # Delete call proxy
+    FileUtils.rm CALL_PROXY_DESTINATION
+
     # Stop Sidekiq
     system "bundle exec sidekiqctl stop #{sidekiq_pidfile} #{sidekiq_timeout}"
     while File.exist?(sidekiq_pidfile)

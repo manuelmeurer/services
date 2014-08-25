@@ -3,7 +3,7 @@ module Services
     module CallLogger
       def call(*args)
         log "START with args #{args}"
-        log "CALLED BY #{caller}"
+        log "CALLED BY #{caller || '(not found)'}"
         start = Time.now
         begin
           result = super
@@ -38,10 +38,16 @@ module Services
       end
 
       def caller
-        caller_location = caller_locations(2, 1).first
-        caller_path = caller_location.path
-        caller_path = caller_path.sub(%r(\A#{Regexp.escape Rails.root.to_s}/), '') if defined?(Rails)
-        [caller_path, caller_location.lineno].join(':')
+        caller_location = caller_locations(1, 10).detect do |location|
+          location.path !~ /\A#{Regexp.escape File.expand_path('../..', __FILE__)}/
+        end
+        if caller_location.nil?
+          nil
+        else
+          caller_path = caller_location.path
+          caller_path = caller_path.sub(%r(\A#{Regexp.escape Rails.root.to_s}/), '') if defined?(Rails)
+          [caller_path, caller_location.lineno].join(':')
+        end
       end
     end
   end

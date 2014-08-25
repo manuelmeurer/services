@@ -21,7 +21,7 @@ describe Services::Base::CallLogger do
 
     # When Rails is not defined, the complete caller path should be logged
     service_calling_service.call called_service
-    expect(logs).to include(/\ACALLED BY #{Regexp.escape(PROJECT_ROOT.join(SERVICES_PATH).to_s)}:\d+/)
+    expect(logs).to include(/\ACALLED BY #{Regexp.escape PROJECT_ROOT.join(TEST_SERVICES_PATH).to_s}:\d+/)
 
     # When Rails is defined, only the caller path relative to Rails.root is logged
     class Rails
@@ -29,8 +29,14 @@ describe Services::Base::CallLogger do
     end
     logs = []
     service_calling_service.call called_service
-    expect(logs).to include(/\ACALLED BY #{Regexp.escape(SERVICES_PATH)}:\d+/)
+    expect(logs).to include(/\ACALLED BY #{Regexp.escape TEST_SERVICES_PATH.to_s}:\d+/)
     Object.send :remove_const, :Rails
+
+    # Caller paths from services lib folder should be filtered
+    require 'services/call_proxy'
+    logs = []
+    Services::CallProxy.call(called_service, :call)
+    expect(logs).to include(/\ACALLED BY #{Regexp.escape __FILE__}:\d+/)
   end
 
   if RUBY_VERSION > '2.1'
