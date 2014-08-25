@@ -65,31 +65,31 @@ class ServiceCallingService < Services::Base
 end
 
 class UniqueService < Services::Base
-  def call
-    check_uniqueness!
-    sleep 0.5
+  def call(on_error, sleep)
+    check_uniqueness! on_error: on_error
+    sleep 0.5 if sleep
   end
 end
 
 class UniqueWithCustomArgsService < Services::Base
-  def call(uniqueness_arg1, uniqueness_arg2, ignore_arg)
-    check_uniqueness! uniqueness_arg1, uniqueness_arg2
-    sleep 0.5
+  def call(uniqueness_arg1, uniqueness_arg2, ignore_arg, on_error, sleep)
+    check_uniqueness! uniqueness_arg1, uniqueness_arg2, on_error: on_error
+    sleep 0.5 if sleep
   end
 end
 
 class UniqueMultipleService < Services::Base
-  def call(*args)
+  def call(*args, on_error, sleep)
     args.each do |arg|
-      check_uniqueness! arg
+      check_uniqueness! arg, on_error: on_error
     end
-    sleep 0.5
+    sleep 0.5 if sleep
   end
 end
 
 class NonUniqueService < Services::Base
-  def call
-    sleep 0.5
+  def call(on_error, sleep)
+    sleep 0.5 if sleep
   end
 end
 
