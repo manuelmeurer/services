@@ -46,9 +46,9 @@ describe Services::Base::CallLogger do
       allow(service).to receive(:log) do |message, *|
         logs << message
       end
-      expect { service.call }.to raise_error(NestedExceptionService::Error)
+      expect { service.call }.to raise_error(service.class::Error)
       %w(NestedError1 NestedError2).each do |error|
-        expect(logs).to include(/\Acaused by: NestedExceptionService::#{error}/)
+        expect(logs).to include(/\Acaused by: #{service.class}::#{error}/)
       end
     end
   end
