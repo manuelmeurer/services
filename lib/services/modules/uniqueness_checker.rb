@@ -37,7 +37,7 @@ module Services
               raise_non_unique_error
             else
               error_count += 1
-              self.class.perform_in retry_delay(error_count), @service_args
+              self.class.perform_in retry_delay(error_count), *@service_args
               Services.configuration.redis.setex error_count_key, retry_delay(error_count) + ONE_HOUR, error_count
               false
             end

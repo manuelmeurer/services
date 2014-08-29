@@ -39,7 +39,7 @@ shared_examples 'checking the uniqueness properly' do
       if defined?(fail_args)
         3.times do
           fail_args.each do |fail_arg_group|
-            expect(service).to receive(:perform_in).with(an_instance_of(Fixnum), fail_arg_group + (['reschedule', false]))
+            expect(service).to receive(:perform_in).with(an_instance_of(Fixnum), *fail_arg_group, 'reschedule', false)
             service.call(*fail_arg_group, 'reschedule', false)
           end
         end
