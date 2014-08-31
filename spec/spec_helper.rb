@@ -71,8 +71,12 @@ RSpec.configure do |config|
     FileUtils.cp CALL_PROXY_SOURCE, CALL_PROXY_DESTINATION
 
     # Wait until Redis and Sidekiq are started
-    while !File.exist?(sidekiq_pidfile) || !File.exist?(redis_pidfile)
-      puts 'Waiting for Sidekiq and Redis to start...'
+    while !File.exist?(sidekiq_pidfile)
+      puts 'Waiting for Sidekiq to start...'
+      sleep 0.5
+    end
+    while !ENV['TRAVIS'] && !File.exist?(redis_pidfile)
+      puts 'Waiting for Redis to start...'
       sleep 0.5
     end
   end
