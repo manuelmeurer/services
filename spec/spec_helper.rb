@@ -69,6 +69,12 @@ RSpec.configure do |config|
 
     # Copy call proxy
     FileUtils.cp CALL_PROXY_SOURCE, CALL_PROXY_DESTINATION
+
+    # Wait until Redis and Sidekiq are started
+    while !File.exist?(sidekiq_pidfile) || !File.exist?(redis_pidfile)
+      puts 'Waiting for Sidekiq and Redis to start...'
+      sleep 0.5
+    end
   end
 
   config.after :suite do
