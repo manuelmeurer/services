@@ -3,7 +3,7 @@ require 'sidekiq/api'
 ExpectedDataNotFoundError = Class.new(StandardError)
 
 def wait_for(&block)
-  10.tries on: ExpectedDataNotFoundError, delay: 0.1 do
+  50.tries on: ExpectedDataNotFoundError, delay: 0.1 do
     block.call or raise ExpectedDataNotFoundError
   end
 end

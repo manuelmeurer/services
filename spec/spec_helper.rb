@@ -85,7 +85,7 @@ RSpec.configure do |config|
     system "bundle exec sidekiqctl stop #{sidekiq_pidfile} #{sidekiq_timeout}"
     while File.exist?(sidekiq_pidfile)
       puts 'Waiting for Sidekiq to shut down...'
-      sleep 1
+      sleep 0.5
     end
 
     unless ENV['TRAVIS']
@@ -94,7 +94,7 @@ RSpec.configure do |config|
       system "#{redis_cli} -p #{redis_port} shutdown"
       while File.exist?(redis_pidfile)
         puts 'Waiting for Redis to shut down...'
-        sleep 1
+        sleep 0.5
       end
     end
 
