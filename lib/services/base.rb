@@ -29,7 +29,7 @@ module Services
       ids_or_objects = Array(ids_or_objects)
       ids, objects = ids_or_objects.grep(Fixnum), ids_or_objects.grep(klass)
       if ids.size + objects.size < ids_or_objects.size
-        raise "All params must be either #{klass.to_s.pluralize} or Fixnums: #{ids_or_objects.map(&:class)}"
+        raise "All params must be either #{klass.to_s.pluralize} or Fixnums: #{ids_or_objects.map { |id_or_object| [id_or_object.class, id_or_object.inspect].join(' - ')}}"
       end
       if ids.any?
         find_service = "Services::#{klass.to_s.pluralize}::Find"
