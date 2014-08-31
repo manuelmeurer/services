@@ -68,9 +68,9 @@ describe Services::Base::UniquenessChecker do
   context 'when the service checks for uniqueness with custom args' do
     it_behaves_like 'checking the uniqueness properly' do
       let(:service)          { UniqueWithCustomArgsService }
-      let(:args)             { %w(foo bar baz) }
-      let(:fail_args)        { [%w(foo bar pelle)] }
-      let(:pass_args)        { [%w(foo baz pelle)] }
+      let(:args)             { ['foo', 1, 'bar'] }
+      let(:fail_args)        { [['foo', 1, 'pelle']] }
+      let(:pass_args)        { [['foo', 2, 'bar']] }
       let(:keys_after_start) { 1 }
     end
   end
@@ -78,7 +78,7 @@ describe Services::Base::UniquenessChecker do
   context 'when the service checks for uniqueness multiple times' do
     it_behaves_like 'checking the uniqueness properly' do
       let(:service)          { UniqueMultipleService }
-      let(:args)             { %w(foo bar baz) }
+      let(:args)             { ['foo', 1, true] }
       let(:fail_args)        { args.map { |arg| [arg] } }
       let(:pass_args)        { [%w(pelle)] }
       let(:keys_after_start) { 3 }
