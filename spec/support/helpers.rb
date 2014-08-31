@@ -14,6 +14,12 @@ def worker_with_jid(jid)
   end
 end
 
+def wait_for_all_jobs_to_finish
+  wait_for do
+    Sidekiq::Workers.new.size == 0
+  end
+end
+
 def wait_for_job_to_run(job_class, *args, &block)
   job_class.perform_async(*args).tap do |jid|
     wait_for { worker_with_jid(jid) }

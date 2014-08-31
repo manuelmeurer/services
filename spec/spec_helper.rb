@@ -104,6 +104,10 @@ RSpec.configure do |config|
       File.truncate file, max_len if File.size(file) > max_len
     end
   end
+
+  config.after :each do
+    wait_for_all_jobs_to_finish
+  end
 end
 
 def options_hash_to_string(options)
