@@ -12,6 +12,9 @@ log_dir            = support_dir.join('log')
 
 CALL_PROXY_SOURCE      = support_dir.join('call_proxy.rb')
 CALL_PROXY_DESTINATION = PROJECT_ROOT.join('lib', 'services', 'call_proxy.rb')
+WAIT                   = 0.5
+START_TIMEOUT          = 5
+STOP_TIMEOUT           = 20
 
 Dir[support_dir.join('**', '*.rb')].each { |f| require f }
 
@@ -71,13 +74,18 @@ RSpec.configure do |config|
     FileUtils.cp CALL_PROXY_SOURCE, CALL_PROXY_DESTINATION
 
     # Wait until Redis and Sidekiq are started
-    while !File.exist?(sidekiq_pidfile)
-      puts 'Waiting for Sidekiq to start...'
-      sleep 0.5
-    end
-    while !ENV['TRAVIS'] && !File.exist?(redis_pidfile)
-      puts 'Waiting for Redis to start...'
-      sleep 0.5
+    @processes = {
+      'Sidekiq' => sidekiq_pidfile
+    }
+    @processes['Redis'] = redis_pidfile unless ENV['TRAVIS']
+    @processes.each do |process, pidfile|
+      i = 0
+      while !File.exist?(pidfile)
+        puts "Waiting for #{process} to start..."
+        sleep WAIT
+        i += WAIT
+        raise "#{process} didn't start in #{i} seconds." if i >= START_TIMEOUT
+      end
     end
   end
 
@@ -87,18 +95,20 @@ RSpec.configure do |config|
 
     # Stop Sidekiq
     system "bundle exec sidekiqctl stop #{sidekiq_pidfile} #{sidekiq_timeout}"
-    while File.exist?(sidekiq_pidfile)
-      puts 'Waiting for Sidekiq to shut down...'
-      sleep 0.5
-    end
 
     unless ENV['TRAVIS']
       # Stop Redis
       redis_cli = support_dir.join('redis-cli')
       system "#{redis_cli} -p #{redis_port} shutdown"
-      while File.exist?(redis_pidfile)
-        puts 'Waiting for Redis to shut down...'
-        sleep 0.5
+    end
+
+    @processes.each do |process, pidfile|
+      i = 0
+      while File.exist?(pidfile)
+        puts "Waiting for #{process} to stop..."
+        sleep WAIT
+        i += WAIT
+        raise "#{process} didn't stop in #{i} seconds." if i >= STOP_TIMEOUT
       end
     end
 
