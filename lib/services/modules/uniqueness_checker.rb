@@ -27,21 +27,19 @@ module Services
         raise "A uniqueness key with args #{@uniqueness_args.inspect} already exists." if @uniqueness_keys && @uniqueness_keys.include?(new_uniqueness_key)
         if @similar_service_id = Services.configuration.redis.get(new_uniqueness_key)
           case on_error.to_sym
-          when :ignore
-            false
           when :fail
             raise_non_unique_error
           when :reschedule
-            error_count = (Services.configuration.redis.get(error_count_key) || 0).to_i
-            if error_count >= MAX_RETRIES
+            @error_count = (Services.configuration.redis.get(error_count_key) || 0).to_i
+            if @error_count >= MAX_RETRIES
               raise_non_unique_error
             else
-              error_count += 1
-              self.class.perform_in retry_delay(error_count), *@service_args
-              Services.configuration.redis.setex error_count_key, retry_delay(error_count) + ONE_HOUR, error_count
-              false
+              @error_count += 1
+              reschedule
+              Services.configuration.redis.setex error_count_key, retry_delay + ONE_HOUR, @error_count
             end
           end
+          false
         else
           @uniqueness_keys ||= []
           @uniqueness_keys << new_uniqueness_key
@@ -66,6 +64,21 @@ module Services
         raise self.class::NotUniqueError, message
       end
 
+      def reschedule
+        # Convert service args to fixnums first
+        reschedule_args = @service_args.map do |arg|
+          case arg
+          when Fixnum, String, TrueClass, FalseClass, NilClass
+            arg
+          when service_class && arg.respond_to?(:id)
+            arg.id
+          else
+            raise "Don't know how to convert arg #{arg.inspect} for rescheduling."
+          end
+        end
+        self.class.perform_in retry_delay, *reschedule_args
+      end
+
       def uniqueness_key(args)
         [
           KEY_PREFIX,
@@ -85,8 +98,8 @@ module Services
         end.join(':')
       end
 
-      def retry_delay(error_count)
-        (error_count ** 3) + 5
+      def retry_delay
+        (@error_count ** 3) + 5
       end
     end
   end
