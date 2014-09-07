@@ -30,13 +30,11 @@ module Services
           when :fail
             raise_non_unique_error
           when :reschedule
-            @error_count = (Services.configuration.redis.get(error_count_key) || 0).to_i
-            if @error_count >= MAX_RETRIES
+            if error_count >= MAX_RETRIES
               raise_non_unique_error
             else
-              @error_count += 1
+              increase_error_count
               reschedule
-              Services.configuration.redis.setex error_count_key, retry_delay + ONE_HOUR, @error_count
             end
           end
           false
@@ -79,6 +77,15 @@ module Services
         self.class.perform_in retry_delay, *reschedule_args
       end
 
+      def error_count
+        (Services.configuration.redis.get(error_count_key) || 0).to_i
+      end
+
+      def increase_error_count
+        Services.configuration.redis.incr error_count_key
+        Services.configuration.redis.setex error_count_key, retry_delay + ONE_HOUR, error_count
+      end
+
       def uniqueness_key(args)
         [
           KEY_PREFIX,
@@ -99,7 +106,7 @@ module Services
       end
 
       def retry_delay
-        (@error_count ** 3) + 5
+        (error_count ** 3) + 5
       end
     end
   end
