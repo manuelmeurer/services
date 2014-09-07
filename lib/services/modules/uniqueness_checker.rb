@@ -62,17 +62,25 @@ module Services
         raise self.class::NotUniqueError, message
       end
 
+      def convert_for_rescheduling(arg)
+        case arg
+        when Array
+          arg.map do |array_arg|
+            convert_for_rescheduling array_arg
+          end
+        when Fixnum, String, TrueClass, FalseClass, NilClass
+          arg
+        when service_class
+          arg.id
+        else
+          raise "Don't know how to convert arg #{arg.inspect} for rescheduling."
+        end
+      end
+
       def reschedule
         # Convert service args to fixnums first
         reschedule_args = @service_args.map do |arg|
-          case arg
-          when Fixnum, String, TrueClass, FalseClass, NilClass
-            arg
-          when service_class && arg.respond_to?(:id)
-            arg.id
-          else
-            raise "Don't know how to convert arg #{arg.inspect} for rescheduling."
-          end
+          convert_for_rescheduling arg
         end
         self.class.perform_in retry_delay, *reschedule_args
       end
