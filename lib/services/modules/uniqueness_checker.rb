@@ -91,8 +91,7 @@ module Services
       end
 
       def increase_error_count
-        Services.configuration.redis.incr error_count_key
-        Services.configuration.redis.setex error_count_key, retry_delay + ONE_HOUR, error_count
+        Services.configuration.redis.setex error_count_key, retry_delay + ONE_HOUR, error_count + 1
       end
 
       def uniqueness_key(args)
