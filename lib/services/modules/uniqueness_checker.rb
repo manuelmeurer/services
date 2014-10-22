@@ -82,6 +82,7 @@ module Services
         reschedule_args = @service_args.map do |arg|
           convert_for_rescheduling arg
         end
+        log "Rescheduling to be executed in #{retry_delay} seconds." if self.respond_to?(:log)
         self.class.perform_in retry_delay, *reschedule_args
       end
 
