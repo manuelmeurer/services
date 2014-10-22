@@ -114,7 +114,7 @@ module Services
       end
 
       def retry_delay
-        (error_count ** 3) + 5
+        error_count ** 3 + 5
       end
     end
   end
