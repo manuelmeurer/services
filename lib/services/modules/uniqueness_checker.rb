@@ -78,7 +78,7 @@ module Services
       end
 
       def reschedule
-        # Convert service args to fixnums first
+        # Convert service args for rescheduling first
         reschedule_args = @service_args.map do |arg|
           convert_for_rescheduling arg
         end
