@@ -97,7 +97,7 @@ module Services
       def uniqueness_key(args)
         [
           KEY_PREFIX,
-          self.class.to_s
+          self.class.to_s.gsub(':', '_')
         ].tap do |key|
           key << Digest::MD5.hexdigest(args.to_s) unless args.empty?
         end.join(':')
@@ -107,7 +107,7 @@ module Services
         [
           KEY_PREFIX,
           'errors',
-          self.class.to_s
+          self.class.to_s.gsub(':', '_')
         ].tap do |key|
           key << Digest::MD5.hexdigest(@service_args.to_s) unless @service_args.empty?
         end.join(':')
