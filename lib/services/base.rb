@@ -48,7 +48,7 @@ module Services
 
     def find_object(*args)
       find_objects(*args).tap do |objects|
-        raise "Expected only one object but found #{objects.size}" unless objects.size == 1
+        raise "Expected exactly one object but found #{objects.size}" unless objects.size == 1
       end.first
     end
 
