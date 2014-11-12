@@ -91,21 +91,20 @@
 
 <p>The following service takes one or more users or user IDs as an argument.</p>
 
-<pre><code>module Services
-  module Users
-    class Delete &lt; Services::Base
-      def call(ids_or_objects)
-        users = find_objects(ids_or_objects)
-        users.each do |user|
+<div class="highlight highlight-ruby"><pre><span class="pl-k">module</span> <span class="pl-entm">Services</span>
+  <span class="pl-k">module</span> <span class="pl-entm">Users</span>
+    <span class="pl-k">class</span> <span class="pl-entc">Delete<span class="pl-eoi"> &lt; Services::Base</span></span>
+      <span class="pl-k">def</span> <span class="pl-enf">call</span>(<span class="pl-vpf">ids_or_objects</span>)
+        users <span class="pl-ko">=</span> find_objects(ids_or_objects)
+        users.each <span class="pl-k">do </span>|<span class="pl-v">user</span>|
           user.destroy
-          Mailer.user_deleted(user).deliver
-        end
+          <span class="pl-sc">Mailer</span>.user_deleted(user).deliver
+        <span class="pl-k">end</span>
         users
-      end
-    end
-  end
-end
-</code></pre>
+      <span class="pl-k">end</span>
+    <span class="pl-k">end</span>
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
 
 <p>As you can see, the helper <code>find_objects</code> is used to make sure you are dealing with an array of users from that point on, no matter whether <code>ids_or_objects</code> is a single user ID or user, or an array of user IDs or users.</p>
 
@@ -113,28 +112,27 @@ end
 
 <p>Another example, this time using <code>Services::BaseFinder</code>:</p>
 
-<pre><code>module Services
-  module Users
-    class Find &lt; Services::BaseFinder
-      private def process(scope, conditions)
-        conditions.each do |k, v|
-          case k
-          when :email, :name
-            scope = scope.where(k =&gt; v)
-          when :product_id
-            scope = scope.joins(:products).where("#{Product.table_name}.id" =&gt; v)
-          when :product_category_id
-            scope = scope.joins(:product_categories).where("#{ProductCategory.table_name}.id" =&gt; v)
-          else
-            raise ArgumentError, "Unexpected condition: #{k}"
-          end
-        end
+<div class="highlight highlight-ruby"><pre><span class="pl-k">module</span> <span class="pl-entm">Services</span>
+  <span class="pl-k">module</span> <span class="pl-entm">Users</span>
+    <span class="pl-k">class</span> <span class="pl-entc">Find<span class="pl-eoi"> &lt; Services::BaseFinder</span></span>
+      <span class="pl-kos">private</span> <span class="pl-k">def</span> <span class="pl-enf">process</span>(<span class="pl-vpf">scope</span>, <span class="pl-vpf">conditions</span>)
+        conditions.each <span class="pl-k">do </span>|<span class="pl-v">k</span>, <span class="pl-v">v</span>|
+          <span class="pl-k">case</span> k
+          <span class="pl-k">when</span> <span class="pl-cos"><span class="pl-pdc1">:</span>email</span>, <span class="pl-cos"><span class="pl-pdc1">:</span>name</span>
+            scope <span class="pl-ko">=</span> scope.where(k =&gt; v)
+          <span class="pl-k">when</span> <span class="pl-cos"><span class="pl-pdc1">:</span>product_id</span>
+            scope <span class="pl-ko">=</span> scope.joins(<span class="pl-cos"><span class="pl-pdc1">:</span>products</span>).where(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s2"><span class="pl-sc">Product</span>.table_name</span><span class="pl-pse"><span class="pl-s2">}</span></span>.id<span class="pl-pds">"</span></span> =&gt; v)
+          <span class="pl-k">when</span> <span class="pl-cos"><span class="pl-pdc1">:</span>product_category_id</span>
+            scope <span class="pl-ko">=</span> scope.joins(<span class="pl-cos"><span class="pl-pdc1">:</span>product_categories</span>).where(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s2"><span class="pl-sc">ProductCategory</span>.table_name</span><span class="pl-pse"><span class="pl-s2">}</span></span>.id<span class="pl-pds">"</span></span> =&gt; v)
+          <span class="pl-k">else</span>
+            <span class="pl-kos">raise</span> <span class="pl-v">ArgumentError</span>, <span class="pl-s1"><span class="pl-pds">"</span>Unexpected condition: <span class="pl-pse">#{</span><span class="pl-s2">k</span><span class="pl-pse"><span class="pl-s2">}</span></span><span class="pl-pds">"</span></span>
+          <span class="pl-k">end</span>
+        <span class="pl-k">end</span>
         scope
-      end
-    end
-  end
-end
-</code></pre>
+      <span class="pl-k">end</span>
+    <span class="pl-k">end</span>
+  <span class="pl-k">end</span>
+<span class="pl-k">end</span></pre></div>
 
 <p>Since you will create services to find objects for pretty much every model you have and they all look very similar, i.e. process the find conditions and return a <code>ActiveRecord::Relation</code>, you can let those services inherit from <code>Services::BaseFinder</code> to remove some of the boilerplate.</p>
 
