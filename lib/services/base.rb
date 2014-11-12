@@ -25,7 +25,7 @@ module Services
 
     private
 
-    def find_objects(ids_or_objects, klass = service_class)
+    def find_objects(ids_or_objects, klass = object_class)
       ids_or_objects = Array(ids_or_objects)
       ids, objects = ids_or_objects.grep(Fixnum), ids_or_objects.grep(klass)
       if ids.size + objects.size < ids_or_objects.size
@@ -52,7 +52,7 @@ module Services
       end.first
     end
 
-    def service_class
+    def object_class
       self.class.to_s[/Services::([^:]+)/, 1].singularize.constantize
     rescue
       raise "Could not determine service class from #{self.class}"

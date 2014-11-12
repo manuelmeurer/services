@@ -70,7 +70,7 @@ module Services
           end
         when Fixnum, String, TrueClass, FalseClass, NilClass
           arg
-        when service_class
+        when object_class
           arg.id
         else
           raise "Don't know how to convert arg #{arg.inspect} for rescheduling."
