@@ -49,7 +49,7 @@ The SQL `Services::BaseFinder` (discussed further down) generates is optimized f
 
 The following service takes one or more users or user IDs as an argument.
 
-```
+```ruby
 module Services
   module Users
     class Delete < Services::Base
@@ -72,7 +72,7 @@ It's good practice to always return the objects a service has been operating on 
 
 Another example, this time using `Services::BaseFinder`:
 
-```
+```ruby
 module Services
   module Users
     class Find < Services::BaseFinder
