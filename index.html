@@ -16,7 +16,7 @@
     <div class="wrapper">
       <header>
         <h1>Services</h1>
-        <p>Services for Ruby</p>
+        <p>A nifty service layer for your Rails app</p>
 
         <p class="view"><a href="https://github.com/krautcomputing/services">View the Project on GitHub <small>krautcomputing/services</small></a></p>
 
@@ -29,22 +29,164 @@
       </header>
       <section>
         <h1>
-<a name="services" class="anchor" href="#services"><span class="octicon octicon-link"></span></a>Services</h1>
+<a id="services" class="anchor" href="#services" aria-hidden="true"><span class="octicon octicon-link"></span></a>Services</h1>
 
 <p><a href="http://badge.fury.io/rb/services"><img src="https://badge.fury.io/rb/services.png" alt="Gem Version"></a>
 <a href="http://travis-ci.org/krautcomputing/services"><img src="https://secure.travis-ci.org/krautcomputing/services.png" alt="Build Status"></a>
 <a href="https://gemnasium.com/krautcomputing/services"><img src="https://gemnasium.com/krautcomputing/services.png" alt="Dependency Status"></a>
 <a href="https://codeclimate.com/github/krautcomputing/services"><img src="https://codeclimate.com/github/krautcomputing/services.png" alt="Code Climate"></a></p>
 
-<p>Services is a opinionated set of modules that can be used to implement the use cases (or services, contexts, whatchamacallit) of a Ruby application.</p>
+<p>Services is a collection of modules and base classes that let you implement a nifty service layer in your Rails app.</p>
 
 <h2>
-<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+<a id="motivation" class="anchor" href="#motivation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Motivation</h2>
+
+<p>A lot has been written about service layers in Rails apps. There are advantages and disadvantages of course, but after using Services since 2013 in several Rails apps, I must say that in my opinion the advantages far outweigh the disadvantages.</p>
+
+<p><strong>The biggest benefit you get with a service layer is that it makes it much easier to reason about your application, find a bug, or implement new features, when all your business logic is in services, not scattered in models, controllers, helpers etc.</strong></p>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>For disambiguation, we let's write Services with a uppercase S when we mean this gem, and services with a lowercase s when we mean, well, the plural of service.</p>
+
+<h3>
+<a id="basic-principles" class="anchor" href="#basic-principles" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic principles</h3>
+
+<p>Services is based on a couple of basic principles of what a service should be and do in your Rails app:</p>
+
+<ul>
+<li>a service does one thing well (Unix philosophy)</li>
+<li>a service can be run synchronously (in the foreground) or asynchronously (in the background)</li>
+<li>a service can be unique, meaning only one instance of it should be run at a time</li>
+<li>a service logs all the things (start time, end time, caller, exceptions etc.)</li>
+<li>a service has its own exception class and all exceptions that it may raise must be of that class or a subclass</li>
+<li>a service can be called with one or multiple objects or one or multiple object IDs</li>
+</ul>
+
+<p>Apart from these basic principles, you can implement the actual logic in a service any way you want.</p>
+
+<h3>
+<a id="conventions" class="anchor" href="#conventions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conventions</h3>
+
+<p>Follow these conventions that Services expects/recommends:</p>
+
+<ul>
+<li>services inherit from <code>Services::Base</code> (or <code>Services::BaseFinder</code>)</li>
+<li>services are located in <code>app/services/</code>
+</li>
+<li>services are namespaced with the model they operate on and their names are verbs, e.g. <code>app/services/users/delete.rb</code> defines <code>Services::Users::Delete</code>. If a service operates on multiple models or no models at all, don't namespace them (<code>Services::DoLotsOfStuff</code>) or namespace them by logical groups unrelated to models (<code>Services::Maintenance::CleanOldUsers</code>, <code>Services::Maintenance::SendDailySummary</code>, etc.)</li>
+<li>Sometimes services must call other services. Try to not combine multiple calls to other services and business logic in one service. Instead, some services should contain only business logic and other services only a bunch of service calls but no (or little) business logic. This keeps your services nice and modular.</li>
+</ul>
+
+<h3>
+<a id="dependence" class="anchor" href="#dependence" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependence</h3>
+
+<p>To process services in the background, Services uses <a href="https://github.com/mperham/sidekiq">Sidekiq</a>. Sidekiq is not absolutely required to use Services though, if it's not present, a service will raise an exception when you try to enqueue it for background processing. If you're using Sidekiq, make sure to load the Services gem after the Sidekiq gem.</p>
+
+<p>The SQL <code>Services::BaseFinder</code> (discussed further down) generates is optimized for Postgres. It might work with other databases but it's not guaranteed. If you're not using Postgres, don't use <code>Services::BaseFinder</code> or, even better, submit a PR that fixes it to work with your database!</p>
+
+<h3>
+<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h3>
+
+<p>The following service takes one or more users or user IDs as an argument.</p>
+
+<pre><code>module Services
+  module Users
+    class Delete &lt; Services::Base
+      def call(ids_or_objects)
+        users = find_objects(ids_or_objects)
+        users.each do |user|
+          user.destroy
+          Mailer.user_deleted(user).deliver
+        end
+        users
+      end
+    end
+  end
+end
+</code></pre>
+
+<p>As you can see, the helper <code>find_objects</code> is used to make sure you are dealing with an array of users from that point on, no matter whether <code>ids_or_objects</code> is a single user ID or user, or an array of user IDs or users.</p>
+
+<p>It's good practice to always return the objects a service has been operating on at the end of the service.</p>
+
+<p>Another example, this time using <code>Services::BaseFinder</code>:</p>
+
+<pre><code>module Services
+  module Users
+    class Find &lt; Services::BaseFinder
+      private def process(scope, conditions)
+        conditions.each do |k, v|
+          case k
+          when :email, :name
+            scope = scope.where(k =&gt; v)
+          when :product_id
+            scope = scope.joins(:products).where("#{Product.table_name}.id" =&gt; v)
+          when :product_category_id
+            scope = scope.joins(:product_categories).where("#{ProductCategory.table_name}.id" =&gt; v)
+          else
+            raise ArgumentError, "Unexpected condition: #{k}"
+          end
+        end
+        scope
+      end
+    end
+  end
+end
+</code></pre>
+
+<p>Since you will create services to find objects for pretty much every model you have and they all look very similar, i.e. process the find conditions and return a <code>ActiveRecord::Relation</code>, you can let those services inherit from <code>Services::BaseFinder</code> to remove some of the boilerplate.</p>
+
+<p><code>Services::BaseFinder</code> inherits from <code>Services::Base</code> and takes an array of IDs and a hash of conditions as parameters. It then extracts some special conditions (:order, :limit, :page, :per_page) that are handled separately and passes a <code>ActiveRecord::Relation</code> and the remaining conditions to the <code>process</code> method that the inheriting class must define. This method should handle all the conditions, extend the scope and return it.</p>
+
+<p>Check out <a href="lib/services/base_finder.rb">the source of <code>Services::BaseFinder</code></a> to understand what it does in more detail.</p>
+
+<h3>
+<a id="helpers" class="anchor" href="#helpers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Helpers</h3>
+
+<p>Your services inherit from <code>Services::Base</code> which makes several helper methods available:</p>
+
+<ul>
+<li>
+<code>Rails.application.routes.url_helpers</code> is included so you use all Rails URL helpers.</li>
+<li>
+<code>find_objects</code> and <code>find_object</code> let you automatically find object or a single object from an array of objects or object IDs, or a single object or object ID. The only difference is that <code>find_object</code> returns a single object whereas <code>find_objects</code> always returns an array.</li>
+<li>
+<code>object_class</code> tries to figure out the class the service operates on. If you follow the service naming conventions and you have a service <code>Services::Products::Find</code>, <code>object_class</code> will return <code>Product</code>. Don't call it if you have a service like <code>Services::DoStuff</code> or it will raise an exception.</li>
+<li>
+<code>controller</code> creates a <code>ActionController::Base</code> instance with an empty request. You can use it to call <code>render_to_string</code> to render a view from your service for example.</li>
+</ul>
+
+<p>Your services also automatically get a custom <code>Error</code> class, so you can <code>raise Error, 'Uh-oh, something has gone wrong!'</code> and a <code>Services::MyService::Error</code> will be raised.</p>
+
+<h3>
+<a id="logging" class="anchor" href="#logging" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging</h3>
+
+<p>to be described...</p>
+
+<h3>
+<a id="exception-wrapping" class="anchor" href="#exception-wrapping" aria-hidden="true"><span class="octicon octicon-link"></span></a>Exception wrapping</h3>
+
+<p>to be described...</p>
+
+<h3>
+<a id="uniqueness-checking" class="anchor" href="#uniqueness-checking" aria-hidden="true"><span class="octicon octicon-link"></span></a>Uniqueness checking</h3>
+
+<p>to be described...</p>
+
+<h3>
+<a id="backgroundasynchronous-processing" class="anchor" href="#backgroundasynchronous-processing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background/asynchronous processing</h3>
+
+<p>to be described...</p>
+
+<h2>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
 
 <p>Ruby &gt;= 2.0</p>
 
 <h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
 
 <p>Add this line to your application's Gemfile:</p>
 
@@ -62,12 +204,7 @@
 </code></pre>
 
 <h2>
-<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
-
-<p>Coming soon...</p>
-
-<h2>
-<a name="contributing" class="anchor" href="#contributing"><span class="octicon octicon-link"></span></a>Contributing</h2>
+<a id="contributing" class="anchor" href="#contributing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Contributing</h2>
 
 <ol>
 <li>Fork it</li>
