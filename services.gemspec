@@ -11,8 +11,8 @@ Gem::Specification.new do |gem|
   gem.platform      = Gem::Platform::RUBY
   gem.author        = 'Manuel Meurer'
   gem.email         = 'manuel@krautcomputing.com'
-  gem.summary       = ''
-  gem.description   = ''
+  gem.summary       = 'A nifty service layer for your Rails app'
+  gem.description   = 'A nifty service layer for your Rails app'
   gem.homepage      = 'http://krautcomputing.github.io/services'
   gem.license       = 'MIT'
 
