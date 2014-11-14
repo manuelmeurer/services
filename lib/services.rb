@@ -14,6 +14,7 @@ end
 
 require_relative 'services/version'
 require_relative 'services/logger/file'
+require_relative 'services/logger/redis'
 begin
   require_relative 'services/asyncable'
 rescue Services::BackgroundProcessorNotFound
