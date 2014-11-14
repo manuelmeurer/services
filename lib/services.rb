@@ -7,13 +7,13 @@ module Services
 
   with_configuration do
     has :host, classes: String
-    has :log_dir, classes: [String, Pathname]
+    has :logger
     has :redis
   end
 end
 
 require_relative 'services/version'
-require_relative 'services/logger'
+require_relative 'services/logger/file'
 begin
   require_relative 'services/asyncable'
 rescue Services::BackgroundProcessorNotFound

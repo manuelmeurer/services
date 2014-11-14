@@ -5,9 +5,5 @@ module Services
     initializer 'services.load_base_finder' do
       require 'services/base_finder'
     end
-
-    config.after_initialize do
-      Services.configuration.log_dir = Rails.root.join('log')
-    end
   end
 end

@@ -26,8 +26,8 @@ sidekiq_pidfile = support_dir.join('sidekiq.pid')
 sidekiq_timeout = 20
 
 Services.configure do |config|
-  config.redis   = Redis.new
-  config.log_dir = log_dir
+  config.redis  = Redis.new
+  config.logger = Services::Logger::File.new(log_dir)
 end
 
 Sidekiq.configure_client do |config|

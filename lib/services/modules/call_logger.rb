@@ -2,12 +2,14 @@ module Services
   class Base
     module CallLogger
       def call(*args)
+        return super if Services.configuration.logger.nil?
+
         log "START with args #{args}"
         log "CALLED BY #{caller || '(not found)'}"
         start = Time.now
         begin
           result = super
-        rescue StandardError => e
+        rescue => e
           log_exception e
           raise e
         ensure
@@ -19,8 +21,7 @@ module Services
       private
 
       def log(message, severity = :info)
-        @logger ||= Logger.new
-        @logger.log [self.class, @id], message, severity
+        Services.configuration.logger.log [self.class, @id], message, severity
       end
 
       def log_exception(e, cause = false)
