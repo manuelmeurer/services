@@ -24,7 +24,7 @@ describe Services::Logger::Redis do
           'tags'     => tags
         }
         expect do
-          logger.log tags, message, severity
+          logger.log message, tags, severity
         end.to change { log_entries }.from([]).to([payload])
       end
     end

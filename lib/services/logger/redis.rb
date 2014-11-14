@@ -5,7 +5,7 @@ module Services
         @redis, @key = redis, key
       end
 
-      def log(tags, message, severity = 'info')
+      def log(message, tags = [], severity = :info)
         value = {
           time:     Time.now.to_i,
           message:  message,

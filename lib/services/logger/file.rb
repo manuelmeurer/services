@@ -9,7 +9,7 @@ module Services
         @logger.clear_tags!
       end
 
-      def log(tags, message, severity = :info)
+      def log(message, tags = [], severity = :info)
         @logger.tagged Time.now, severity.upcase, *tags do
           @logger.send severity, message
         end
