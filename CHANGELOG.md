@@ -1,3 +1,7 @@
+## 1.1.1
+
+* When logging to Redis, convert all values to strings first
+
 ## 1.1.0
 
 * Change arguments for log call in file and Redis logger, replace tag array with meta hash
