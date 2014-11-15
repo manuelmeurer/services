@@ -1,3 +1,7 @@
+## 1.2.0
+
+* Convert log time to time object when fetching logs
+
 ## 1.1.1
 
 * When logging to Redis, convert all values to strings first
