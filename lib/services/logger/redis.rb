@@ -5,14 +5,24 @@ module Services
         @redis, @key = redis, key
       end
 
-      def log(message, tags = [], severity = :info)
+      def log(message, meta = {}, severity = :info)
         value = {
           time:     Time.now.to_i,
           message:  message,
           severity: severity,
-          tags:     tags
+          meta:     meta
         }
         @redis.lpush @key, value.to_json
+      end
+
+      def size
+        @redis.llen @key
+      end
+
+      def fetch
+        @redis.lrange(@key, 0, -1).map do |json|
+          JSON.load json
+        end
       end
 
       def clear

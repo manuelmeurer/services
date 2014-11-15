@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Services::Logger::Redis do
-  let(:tags)        { %w(foo bar baz) }
+  let(:meta)        { { foo: 'bar' } }
   let(:message)     { "One day baby we'll be old" }
   let(:severity)    { 'critical' }
   let(:key)         { 'custom_log_key' }
@@ -14,6 +14,15 @@ describe Services::Logger::Redis do
     end
   end
 
+  def create_logs
+    (2.days.ago.to_i..Time.now.to_i).step(1.hour) do |timestamp|
+      time = Time.at(timestamp)
+      Timecop.freeze time do
+        logger.log time.to_s(:long), weekday: time.strftime('%a')
+      end
+    end
+  end
+
   describe '#log' do
     it 'logs properly' do
       Timecop.freeze do
@@ -21,35 +30,41 @@ describe Services::Logger::Redis do
           'time'     => Time.now.to_i,
           'message'  => message,
           'severity' => severity,
-          'tags'     => tags
+          'meta'     => meta.stringify_keys
         }
         expect do
-          logger.log message, tags, severity
+          logger.log message, meta, severity
         end.to change { log_entries }.from([]).to([payload])
       end
     end
   end
 
-  describe '#clear' do
+  context 'when logs are present' do
     before do
-      (2.days.ago.to_i..Time.now.to_i).step(1.hour) do |timestamp|
-        time = Time.at(timestamp)
-        Timecop.freeze time do
-          tags = [time.strftime('%a')]
-          logger.log tags, time.to_s(:long)
-        end
-      end
+      create_logs
       expect(log_entries.size).to be > 0
     end
 
-    it 'returns all log entries' do
-      expect(log_entries).to eq(logger.clear)
+    describe '#size' do
+      it 'returns the amount of logs' do
+        expect(logger.size).to eq(log_entries.size)
+      end
     end
 
-    it 'clears all log entries' do
-      expect do
-        logger.clear
-      end.to change { log_entries }.to([])
+    describe '#fetch' do
+      it 'returns all logs' do
+        expect(logger.fetch).to eq(log_entries)
+      end
+    end
+
+    describe '#clear' do
+      it 'returns all logs' do
+        expect(log_entries).to eq(logger.clear)
+      end
+
+      it 'clears all log entries' do
+        expect { logger.clear }.to change { log_entries }.to([])
+      end
     end
   end
 end

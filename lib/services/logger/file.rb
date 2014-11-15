@@ -9,7 +9,10 @@ module Services
         @logger.clear_tags!
       end
 
-      def log(message, tags = [], severity = :info)
+      def log(message, meta = {}, severity = :info)
+        tags = meta.map do |k, v|
+          [k, v].join('=')
+        end
         @logger.tagged Time.now, severity.upcase, *tags do
           @logger.send severity, message
         end
