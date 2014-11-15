@@ -1,69 +1,103 @@
 require 'spec_helper'
 
 describe Services::Logger::Redis do
-  let(:meta)        { { foo: 'bar', class: Services::Base, object: redis } }
-  let(:message)     { "One day baby we'll be old" }
-  let(:severity)    { 'critical' }
-  let(:key)         { 'custom_log_key' }
-  let(:redis)       { Redis.new }
-  let(:logger)      { described_class.new(redis, key) }
-
-  def log_entries
-    redis.lrange(key, 0, -1).map do |json|
-      JSON.load json
+  let(:key)    { 'custom_log_key' }
+  let(:redis)  { Redis.new }
+  let(:logger) { described_class.new(redis, key) }
+  let(:logs) {
+    [
+      {
+        time:     Date.new(2014, 9, 15),
+        message:  "One day baby we'll be old",
+        severity: :info,
+        meta: {
+          foo:    'bar',
+          class:  Services::Base,
+          object: redis
+        }
+      }, {
+        time:     Date.new(2014, 10, 10),
+        message:  "Oh baby, we'll be old",
+        severity: :warning,
+        meta:     {}
+      }, {
+        time:     Date.new(2014, 11, 17),
+        message:  'And think of all the stories',
+        severity: :critical,
+        meta: {
+          one:    2,
+          three:  3.14
+        }
+      }, {
+        time:     Date.new(2014, 11, 17),
+        message:  'That we could have told',
+        severity: :debug
+      }
+    ]
+  }
+  let(:fetched_logs) {
+    logs.reverse.map do |log|
+      log[:time] = log[:time].to_time
+      %i(message severity).each do |k|
+        log[k] = log[k].try(:to_s) || ''
+      end
+      log[:meta] = if log.has_key?(:meta)
+        log[:meta].map { |k, v| [k.to_s, v.to_s] }.to_h
+      else
+        {}
+      end
+      log.stringify_keys
     end
-  end
+  }
 
   def create_logs
-    (2.days.ago.to_i..Time.now.to_i).step(1.hour) do |timestamp|
-      time = Time.at(timestamp)
-      Timecop.freeze time do
-        logger.log time.to_s(:long), weekday: time.strftime('%a')
+    logs.each do |log|
+      Timecop.freeze log[:time] do
+        args = [log[:message]]
+        args.push log[:meta] || {}
+        args.push log[:severity] if log.has_key?(:severity)
+        logger.log *args
       end
     end
   end
 
-  describe '#log' do
-    it 'logs properly' do
-      Timecop.freeze do
-        payload = {
-          'time'     => Time.now.to_i,
-          'message'  => message,
-          'severity' => severity,
-          'meta'     => meta.map { |k, v| [k.to_s, v.to_s] }.to_h
-        }
-        expect do
-          logger.log message, meta, severity
-        end.to change { log_entries }.from([]).to([payload])
-      end
+  def logs_in_db
+    redis.lrange(key, 0, -1).map do |json|
+      data = JSON.load(json)
+      data['time'] = Time.at(data['time'])
+      data
     end
+  end
+
+  before do
+    redis.del key
   end
 
   context 'when logs are present' do
     before do
       create_logs
-      expect(log_entries.size).to be > 0
+      expect(logs_in_db.size).to eq(logs.size)
     end
 
     describe '#size' do
       it 'returns the amount of logs' do
-        expect(logger.size).to eq(log_entries.size)
+        expect(logger.size).to eq(logs.size)
       end
     end
 
     describe '#fetch' do
       it 'returns all logs' do
-        expect(logger.fetch).to eq(log_entries)
+        expect(logger.fetch).to eq(fetched_logs)
       end
     end
 
     describe '#clear' do
       it 'returns all logs' do
-        expect(log_entries).to eq(logger.clear)
+        expect(fetched_logs).to eq(logger.clear)
       end
 
       it 'clears all log entries' do
-        expect { logger.clear }.to change { log_entries }.to([])
+        expect { logger.clear }.to change { logs_in_db }.to([])
       end
     end
   end

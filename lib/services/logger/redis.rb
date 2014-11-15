@@ -20,18 +20,22 @@ module Services
       end
 
       def fetch
-        @redis.lrange(@key, 0, -1).map do |json|
-          JSON.load json
-        end
+        @redis.lrange(@key, 0, -1).map(&method(:log_entry_from_json))
       end
 
       def clear
         @redis.multi do
           @redis.lrange @key, 0, -1
           @redis.del @key
-        end.first.map do |json|
-          JSON.load json
-        end
+        end.first.map(&method(:log_entry_from_json))
+      end
+
+      private
+
+      def log_entry_from_json(json)
+        data = JSON.load(json)
+        data['time'] = Time.at(data['time'])
+        data
       end
     end
   end
