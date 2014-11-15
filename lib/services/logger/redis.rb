@@ -8,9 +8,9 @@ module Services
       def log(message, meta = {}, severity = :info)
         value = {
           time:     Time.now.to_i,
-          message:  message,
-          severity: severity,
-          meta:     meta
+          message:  message.to_s,
+          severity: severity.to_s,
+          meta:     meta.map { |k, v| [k.to_s, v.to_s] }.to_h
         }
         @redis.lpush @key, value.to_json
       end

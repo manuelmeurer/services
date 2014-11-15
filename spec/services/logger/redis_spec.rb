@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe Services::Logger::Redis do
-  let(:meta)        { { foo: 'bar' } }
+  let(:meta)        { { foo: 'bar', class: Services::Base, object: redis } }
   let(:message)     { "One day baby we'll be old" }
   let(:severity)    { 'critical' }
   let(:key)         { 'custom_log_key' }
@@ -30,7 +30,7 @@ describe Services::Logger::Redis do
           'time'     => Time.now.to_i,
           'message'  => message,
           'severity' => severity,
-          'meta'     => meta.stringify_keys
+          'meta'     => meta.map { |k, v| [k.to_s, v.to_s] }.to_h
         }
         expect do
           logger.log message, meta, severity
