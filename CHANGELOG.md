@@ -1,3 +1,7 @@
+## 1.3.0
+
+* Allow only certain classes in Redis logger meta (NilClass, TrueClass, FalseClass, Symbol, String, Numeric)
+
 ## 1.2.0
 
 * Convert log time to time object when fetching logs
