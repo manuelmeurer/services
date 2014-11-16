@@ -39,6 +39,15 @@ Follow these conventions that Services expects/recommends:
 * services are namespaced with the model they operate on and their names are verbs, e.g. `app/services/users/delete.rb` defines `Services::Users::Delete`. If a service operates on multiple models or no models at all, don't namespace them (`Services::DoLotsOfStuff`) or namespace them by logical groups unrelated to models (`Services::Maintenance::CleanOldUsers`, `Services::Maintenance::SendDailySummary`, etc.)
 * Sometimes services must call other services. Try to not combine multiple calls to other services and business logic in one service. Instead, some services should contain only business logic and other services only a bunch of service calls but no (or little) business logic. This keeps your services nice and modular.
 
+### Rails autoload fix
+
+By default, Rails expects `app/services/users/delete.rb` to define `Users::Delete`, but we want it to expect `Services::Users::Delete`. To make this work, add the `app` folder to the autoload path:
+
+```ruby
+# config/application.rb
+config.autoload_paths += [config.root.join('app')]
+```
+
 ### Dependence
 
 To process services in the background, Services uses [Sidekiq](https://github.com/mperham/sidekiq). Sidekiq is not absolutely required to use Services though, if it's not present, a service will raise an exception when you try to enqueue it for background processing. If you're using Sidekiq, make sure to load the Services gem after the Sidekiq gem.
