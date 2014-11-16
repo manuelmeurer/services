@@ -20,8 +20,8 @@ module Services
 
       private
 
-      def log(message, severity = :info)
-        Services.configuration.logger.log message, { service: self.class, id: @id }, severity
+      def log(message, severity = 'info')
+        Services.configuration.logger.log message, { service: self.class.to_s, id: @id }, severity
       end
 
       def log_exception(e, cause = false)

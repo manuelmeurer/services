@@ -1,16 +1,30 @@
 module Services
   module Logger
     class Redis
+      META_CLASSES = [
+        NilClass,
+        TrueClass,
+        FalseClass,
+        Symbol,
+        String,
+        Numeric
+      ]
+
+      InvalidMetaError = Class.new(StandardError)
+
       def initialize(redis, key = 'logs')
         @redis, @key = redis, key
       end
 
-      def log(message, meta = {}, severity = :info)
+      def log(message, meta = {}, severity = 'info')
+        # Allow only simple data types in meta
+        raise InvalidMetaError, "Meta keys and values must be of one of the following classes: #{META_CLASSES.join(', ')}" if meta_includes_invalid_values?(meta)
+
         value = {
           time:     Time.now.to_i,
           message:  message.to_s,
           severity: severity.to_s,
-          meta:     meta.map { |k, v| [k.to_s, v.to_s] }.to_h
+          meta:     meta
         }
         @redis.lpush @key, value.to_json
       end
@@ -36,6 +50,16 @@ module Services
         data = JSON.load(json)
         data['time'] = Time.at(data['time'])
         data
+      end
+
+      def meta_includes_invalid_values?(meta)
+        [meta.values, meta.keys].any? do |elements|
+          elements.any? do |element|
+            META_CLASSES.none? do |klass|
+              element.class <= klass
+            end
+          end
+        end
       end
     end
   end

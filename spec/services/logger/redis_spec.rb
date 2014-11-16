@@ -12,14 +12,18 @@ describe Services::Logger::Redis do
         severity: :info,
         meta: {
           foo:    'bar',
-          class:  Services::Base,
-          object: redis
+          class:  Services::Base.to_s,
+          object: redis.to_s
         }
       }, {
         time:     Date.new(2014, 10, 10),
         message:  "Oh baby, we'll be old",
         severity: :warning,
-        meta:     {}
+        meta:     {
+          true:  true,
+          false: false,
+          nil:   nil
+        }
       }, {
         time:     Date.new(2014, 11, 17),
         message:  'And think of all the stories',
@@ -42,7 +46,7 @@ describe Services::Logger::Redis do
         log[k] = log[k].try(:to_s) || ''
       end
       log[:meta] = if log.has_key?(:meta)
-        log[:meta].map { |k, v| [k.to_s, v.to_s] }.to_h
+        log[:meta].stringify_keys
       else
         {}
       end

@@ -9,7 +9,7 @@ module Services
         @logger.clear_tags!
       end
 
-      def log(message, meta = {}, severity = :info)
+      def log(message, meta = {}, severity = 'info')
         tags = meta.map do |k, v|
           [k, v].join('=')
         end
