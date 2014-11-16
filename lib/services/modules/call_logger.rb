@@ -4,38 +4,32 @@ module Services
       def call(*args)
         return super if Services.configuration.logger.nil?
 
-        log "START with args #{args}"
-        log "CALLED BY #{caller || '(not found)'}"
+        log "START with args: #{args}", caller: caller
         start = Time.now
         begin
           result = super
         rescue => e
-          log_exception e
+          log exception_message(e), {}, 'error'
           raise e
         ensure
-          log "END after #{(Time.now - start).round(2)} seconds"
+          log 'END', duration: (Time.now - start).round(2)
           result
         end
       end
 
       private
 
-      def log(message, severity = 'info')
-        Services.configuration.logger.log message, { service: self.class.to_s, id: @id }, severity
+      def log(message, meta = {}, severity = 'info')
+        Services.configuration.logger.log message, meta.merge(service: self.class.to_s, id: @id), severity
       end
 
-      def log_exception(e, cause = false)
-        log "#{'caused by: ' if cause}#{e.class}: #{e.message}"
-        if e.respond_to?(:cause) && e.cause
-          e.backtrace.take(5).each do |line|
-            log "  #{line}"
-          end
-          log_exception(e.cause, true)
-        else
-          e.backtrace.each do |line|
-            log "  #{line}"
-          end
+      def exception_message(e)
+        message = "#{e.class}: #{e.message}"
+        e.backtrace.each do |line|
+          message << "\n  #{line}"
         end
+        message << "\ncaused by: #{exception_message(e.cause)}" if e.respond_to?(:cause) && e.cause
+        message
       end
 
       def caller
