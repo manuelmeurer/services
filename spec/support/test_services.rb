@@ -43,7 +43,9 @@ end
 module Services
   module Models
     class BaseFind < Services::BaseFinder
-      private def process(scope, conditions)
+      private
+
+      def process(scope, conditions)
         scope
       end
     end
