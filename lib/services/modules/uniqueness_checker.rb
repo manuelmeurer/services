@@ -19,7 +19,7 @@ module Services
         mod.const_set :NotUniqueError, Class.new(mod::Error)
       end
 
-      def check_uniqueness!(*args, on_error: :fail)
+      def check_uniqueness(*args, on_error: :fail)
         raise "on_error must be one of #{ON_ERROR.join(', ')}, but was #{on_error}" unless ON_ERROR.include?(on_error.to_sym)
         raise 'Service args not found.' if @service_args.nil?
         @uniqueness_args = args.empty? ? @service_args : args
