@@ -7,7 +7,7 @@ describe Services::Base::ExceptionWrapper do
         ErrorService.call
       end.to raise_error do |error|
         expect(error).to be_a(ErrorService::Error)
-        expect(error.message).to eq('I am a service error.')
+        expect(error.message).to eq('I am a service error raised by ErrorService.')
         expect(error.cause).to be_nil
       end
 

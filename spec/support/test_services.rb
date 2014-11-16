@@ -1,4 +1,19 @@
+require 'services/base_finder'
+
 class Model
+  class << self
+    def table_name
+      'models'
+    end
+
+    # Stub ActiveRecord methods
+    %i(select order where limit page per).each do |m|
+      define_method m do |*args|
+        self
+      end
+    end
+  end
+
   attr_reader :id
 
   def initialize(id)
@@ -27,6 +42,12 @@ end
 
 module Services
   module Models
+    class BaseFind < Services::BaseFinder
+      private def process(scope, conditions)
+        scope
+      end
+    end
+
     class Find < Services::Base
       def call(ids)
         ids.map { |id| ModelRepository.find id }.compact
@@ -52,9 +73,24 @@ class EmptyService < Services::Base
   end
 end
 
+class EmptyServiceWithoutCallLogging < Services::Base
+  disable_call_logging
+
+  def call(*args)
+  end
+end
+
 class ErrorService < Services::Base
   def call
-    raise Error.new('I am a service error.')
+    raise Error, "I am a service error raised by #{self.class}."
+  end
+end
+
+class ErrorServiceWithoutCallLogging < Services::Base
+  disable_call_logging
+
+  def call
+    raise Error, "I am a service error raised by #{self.class}."
   end
 end
 

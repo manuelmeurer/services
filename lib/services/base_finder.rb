@@ -1,5 +1,7 @@
 module Services
   class BaseFinder < Services::Base
+    disable_call_logging
+
     def call(ids = [], conditions = {})
       ids, conditions = Array(ids), conditions.symbolize_keys
       special_conditions = conditions.extract!(:order, :limit, :page, :per_page)

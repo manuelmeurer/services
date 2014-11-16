@@ -1,18 +1,35 @@
 module Services
   class Base
     module CallLogger
+      def self.prepended(mod)
+        mod.extend ClassMethods
+      end
+
+      module ClassMethods
+        attr_accessor :call_logging_disabled
+
+        def disable_call_logging
+          @call_logging_disabled = true
+        end
+
+        def enable_call_logging
+          @call_logging_disabled = false
+        end
+      end
+
       def call(*args)
         return super if Services.configuration.logger.nil?
-
-        log "START with args: #{args}", caller: caller
-        start = Time.now
+        unless self.class.call_logging_disabled
+          log "START with args: #{args}", caller: caller
+          start = Time.now
+        end
         begin
           result = super
         rescue => e
           log exception_message(e), {}, 'error'
           raise e
         ensure
-          log 'END', duration: (Time.now - start).round(2)
+          log 'END', duration: (Time.now - start).round(2) unless self.class.call_logging_disabled
           result
         end
       end
