@@ -1,3 +1,10 @@
+## 2.0.0
+
+* Improve call logging
+* Implement `disable_call_logging` and `enable_call_logging` to control call logging for specific services
+* Disable call logging for `BaseFinder` by default
+* Rename `check_uniqueness!` to `check_uniqueness`
+
 ## 1.3.0
 
 * Allow only certain classes in Redis logger meta (NilClass, TrueClass, FalseClass, Symbol, String, Numeric)
