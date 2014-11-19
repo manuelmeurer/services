@@ -9,35 +9,37 @@ Services is a collection of modules and base classes that let you implement a ni
 
 ## Motivation
 
-A lot has been written about service layers in Rails apps. There are advantages and disadvantages of course, but after using Services since 2013 in several Rails apps, I must say that in my opinion the advantages far outweigh the disadvantages.
+A lot has been written about service layers in Rails apps. There are of course advantages and disadvantages, but after using Services since 2013 in several Rails apps, I must say that in my opinion the advantages far outweigh the disadvantages.
 
-**The biggest benefit you get with a service layer is that it makes it much easier to reason about your application, find a bug, or implement new features, when all your business logic is in services, not scattered in models, controllers, helpers etc.**
+**The biggest benefit you get with a service layer is that it gets much easier to reason about your application, find a bug, or implement new features, when all your business logic is in services, not scattered in models, controllers, helpers etc.**
 
 ## Usage
 
-For disambiguation, we let's write Services with a uppercase S when we mean this gem, and services with a lowercase s when we mean, well, the plural of service.
+For disambiguation, we let's write Services with a uppercase "S" when we mean this gem, and services with a lowercase "s" when we mean, well, the plural of service.
 
 ### Basic principles
 
-Services is based on a couple of basic principles of what a service should be and do in your Rails app:
+Services is based on a couple of basic principles of what a service should be and do in your app:
 
-* a service does one thing well (Unix philosophy)
-* a service can be run synchronously (in the foreground) or asynchronously (in the background)
-* a service can be unique, meaning only one instance of it should be run at a time
-* a service logs all the things (start time, end time, caller, exceptions etc.)
-* a service has its own exception class and all exceptions that it may raise must be of that class or a subclass
-* a service can be called with one or multiple objects or one or multiple object IDs
+A service...
+
+* ...does one thing well (Unix philosophy)
+* ...can be run synchronously (in the foreground) or asynchronously (in the background)
+* ...can be unique, meaning only one instance of it should be run at a time
+* ...logs all the things (start time, end time, duration, caller, exceptions etc.)
+* ...has its own exception class(es) that all exceptions that it may raise inherit from
+* ...can be called with one or multiple objects or one or multiple object IDs
 
 Apart from these basic principles, you can implement the actual logic in a service any way you want.
 
 ### Conventions
 
-Follow these conventions that Services expects/recommends:
+Follow these conventions when using Services in your Rails app:
 
 * services inherit from `Services::Base` (or `Services::BaseFinder`)
 * services are located in `app/services/`
-* services are namespaced with the model they operate on and their names are verbs, e.g. `app/services/users/delete.rb` defines `Services::Users::Delete`. If a service operates on multiple models or no models at all, don't namespace them (`Services::DoLotsOfStuff`) or namespace them by logical groups unrelated to models (`Services::Maintenance::CleanOldUsers`, `Services::Maintenance::SendDailySummary`, etc.)
-* Sometimes services must call other services. Try to not combine multiple calls to other services and business logic in one service. Instead, some services should contain only business logic and other services only a bunch of service calls but no (or little) business logic. This keeps your services nice and modular.
+* services are namespaced with the model they operate on and their names are verbs, e.g. `app/services/users/delete.rb` defines `Services::Users::Delete`. If a service operates on multiple models or no models at all, don't namespace them (`Services::DoStuff`) or namespace them by logical groups unrelated to models (`Services::Maintenance::CleanOldUsers`, `Services::Maintenance::SendDailySummary`, etc.)
+* some services call other services. Try to not combine multiple calls to other services and business logic in one service. Instead, some services should contain only business logic and other services only a bunch of service calls but no (or little) business logic. This keeps your services nice and modular.
 
 ### Rails autoload fix
 
@@ -50,9 +52,17 @@ config.autoload_paths += [config.root.join('app')]
 
 ### Dependence
 
-To process services in the background, Services uses [Sidekiq](https://github.com/mperham/sidekiq). Sidekiq is not absolutely required to use Services though, if it's not present, a service will raise an exception when you try to enqueue it for background processing. If you're using Sidekiq, make sure to load the Services gem after the Sidekiq gem.
+#### Redis
 
-The SQL `Services::BaseFinder` (discussed further down) generates is optimized for Postgres. It might work with other databases but it's not guaranteed. If you're not using Postgres, don't use `Services::BaseFinder` or, even better, submit a PR that fixes it to work with your database!
+to be described...
+
+#### Sidekiq
+
+To process services in the background, Services uses [Sidekiq](https://github.com/mperham/sidekiq). Sidekiq is not required to use Services though. If it's not present when Services is loaded, a service will raise an exception when you try to enqueue it for background processing. If you use Sidekiq, make sure to load the Services gem after the Sidekiq gem.
+
+#### Postgres
+
+The SQL that `Services::BaseFinder` (discussed further down) generates is optimized for Postgres. It might work with other databases but it's not guaranteed. If you're not using Postgres, don't use `Services::BaseFinder` or, even better, submit a [pull request](https://github.com/krautcomputing/services/issues) that fixes it to work with your database!
 
 ### Examples
 
@@ -74,6 +84,22 @@ module Services
   end
 end
 ```
+
+This service can be called in several ways:
+
+```ruby
+# Execute synchronously/immediately
+Services::Users::Delete.call User.find(1)                # with a user object
+Services::Users::Delete.call User.where(id: [1, 2, 3])   # with multiple user objects
+Services::Users::Delete.call 1                           # with a user ID
+Services::Users::Delete.call [1, 2, 3]                   # with multiple user IDs
+
+# Execute asynchronously/in the background
+Services::Users::Delete.perform_async 1                  # with a user ID
+Services::Users::Delete.perform_async [1, 2, 3]          # with multiple user IDs
+```
+
+As you can see, you cannot use objects when calling a service asynchronously since the arguments are serialized to Redis.
 
 As you can see, the helper `find_objects` is used to make sure you are dealing with an array of users from that point on, no matter whether `ids_or_objects` is a single user ID or user, or an array of user IDs or users.
 
