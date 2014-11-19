@@ -1,3 +1,7 @@
+## 2.0.1
+
+* Fix disabling call logging
+
 ## 2.0.0
 
 * Improve call logging
