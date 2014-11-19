@@ -3,9 +3,17 @@ module Services
     module CallLogger
       def self.prepended(mod)
         mod.extend ClassMethods
+        mod.instance_eval do
+          def inherited(subclass)
+            subclass.extend ClassMethods
+            subclass.disable_call_logging if self.call_logging_disabled
+          end
+        end
       end
 
       module ClassMethods
+        @call_logging_disabled = false
+
         attr_accessor :call_logging_disabled
 
         def disable_call_logging

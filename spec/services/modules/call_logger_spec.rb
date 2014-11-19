@@ -1,30 +1,14 @@
 require 'spec_helper'
 
 describe Services::Base::CallLogger do
-  let(:logger) { spy('logger') }
-
-  before do
-    Services.configuration.logger = logger
-    @logs = []
-    allow(logger).to receive(:log) do |message, meta, severity|
-      @logs << {
-        message:  message,
-        meta:     meta,
-        severity: severity
-      }
-    end
-  end
-
-  after do
-    Services.configuration.logger = nil
-  end
+  include_context 'capture logs'
 
   context 'when call logging is enabled' do
     it 'logs start and end' do
       service, args = EmptyService.new, %w(foo bar)
       service.call *args
       caller_regex = /\A#{Regexp.escape __FILE__}:\d+\z/
-      expect(@logs.first).to match(
+      expect(logs.first).to match(
         message:  "START with args: #{args}",
         meta: {
           caller:  a_string_matching(caller_regex),
@@ -33,7 +17,7 @@ describe Services::Base::CallLogger do
         },
         severity: 'info'
       )
-      expect(@logs.last).to match(
+      expect(logs.last).to match(
         message: 'END',
         meta: {
           duration: 0.0,
@@ -53,7 +37,7 @@ describe Services::Base::CallLogger do
         Services::CallProxy.call(called_service, :call)
         caller_regex = /\A#{Regexp.escape __FILE__}:\d+/
         expect(
-          @logs.detect do |log|
+          logs.detect do |log|
             log[:meta][:caller] =~ caller_regex
           end
         ).to be_present
@@ -64,7 +48,7 @@ describe Services::Base::CallLogger do
           service_calling_service.call called_service
           caller_regex = /\A#{Regexp.escape PROJECT_ROOT.join(TEST_SERVICES_PATH).to_s}:\d+/
           expect(
-            @logs.detect do |log|
+            logs.detect do |log|
               log[:meta][:caller] =~ caller_regex
             end
           ).to be_present
@@ -88,7 +72,7 @@ describe Services::Base::CallLogger do
           service_calling_service.call called_service
           caller_regex = /\A#{Regexp.escape TEST_SERVICES_PATH.to_s}:\d+/
           expect(
-            @logs.detect do |log|
+            logs.detect do |log|
               log[:meta][:caller] =~ caller_regex
             end
           ).to be_present
@@ -99,13 +83,14 @@ describe Services::Base::CallLogger do
 
   context 'when call logging is disabled' do
     it 'does not log start and end' do
-      expect { EmptyServiceWithoutCallLogging.call }.to_not change { @logs }
+      expect(EmptyServiceWithoutCallLogging.call_logging_disabled).to eq(true)
+      expect { EmptyServiceWithoutCallLogging.call }.to_not change { logs }
     end
   end
 
   it 'logs exceptions' do
     [ErrorService, ErrorServiceWithoutCallLogging].each do |klass|
-      expect { klass.call rescue nil }.to change { @logs }
+      expect { klass.call rescue nil }.to change { logs }
     end
   end
 
@@ -116,7 +101,7 @@ describe Services::Base::CallLogger do
       %w(NestedError1 NestedError2).each do |error|
         message_regex = /caused by: #{service.class}::#{error}/
         expect(
-          @logs.detect do |log|
+          logs.detect do |log|
             log[:message] =~ message_regex
           end
         ).to be_present
