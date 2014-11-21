@@ -7,20 +7,18 @@ require 'active_support/core_ext'
 
 require_relative '../lib/services'
 
-PROJECT_ROOT       = Pathname.new(File.expand_path('../..', __FILE__))
-TEST_SERVICES_PATH = Pathname.new(File.join('spec', 'support', 'test_services.rb'))
-support_dir        = Pathname.new(File.expand_path('../support', __FILE__))
-
-CALL_PROXY_SOURCE      = support_dir.join('call_proxy.rb')
+PROJECT_ROOT           = Pathname.new(File.expand_path('../..', __FILE__))
+SUPPORT_DIR            = Pathname.new(File.expand_path('../support', __FILE__))
+TEST_SERVICES_PATH     = Pathname.new(File.join('spec', 'support', 'test_services.rb'))
 CALL_PROXY_DESTINATION = PROJECT_ROOT.join('lib', 'services', 'call_proxy.rb')
+CALL_PROXY_SOURCE      = SUPPORT_DIR.join('call_proxy.rb')
+SIDEKIQ_PIDFILE        = SUPPORT_DIR.join('sidekiq.pid')
 WAIT                   = 0.5
 START_TIMEOUT          = 5
-STOP_TIMEOUT           = 20
+SIDEKIQ_TIMEOUT        = 20
 
-Dir[support_dir.join('**', '*.rb')].each { |f| require f }
+Dir[SUPPORT_DIR.join('**', '*.rb')].each { |f| require f }
 
-sidekiq_pidfile = support_dir.join('sidekiq.pid')
-sidekiq_timeout = 20
 
 Services.configure do |config|
   config.redis = Redis.new
@@ -44,11 +42,11 @@ RSpec.configure do |config|
     sidekiq_options = {
       concurrency: 10,
       daemon:      true,
-      timeout:     sidekiq_timeout,
+      timeout:     SIDEKIQ_TIMEOUT,
       verbose:     true,
       require:     __FILE__,
-      logfile:     support_dir.join('log', 'sidekiq.log'),
-      pidfile:     sidekiq_pidfile
+      logfile:     SUPPORT_DIR.join('log', 'sidekiq.log'),
+      pidfile:     SIDEKIQ_PIDFILE
     }
     system "bundle exec sidekiq #{options_hash_to_string(sidekiq_options)}"
 
@@ -57,7 +55,7 @@ RSpec.configure do |config|
 
     # Wait for Sidekiq to start
     i = 0
-    while !File.exist?(sidekiq_pidfile)
+    while !File.exist?(SIDEKIQ_PIDFILE)
       puts 'Waiting for Sidekiq to start...'
       sleep WAIT
       i += WAIT
@@ -67,17 +65,17 @@ RSpec.configure do |config|
 
   config.after :suite do
     # Stop Sidekiq
-    system "bundle exec sidekiqctl stop #{sidekiq_pidfile} #{sidekiq_timeout}"
+    system "bundle exec sidekiqctl stop #{SIDEKIQ_PIDFILE} #{SIDEKIQ_TIMEOUT}"
 
     # Delete call proxy
     FileUtils.rm CALL_PROXY_DESTINATION
 
     i = 0
-    while File.exist?(sidekiq_pidfile)
+    while File.exist?(SIDEKIQ_PIDFILE)
       puts 'Waiting for Sidekiq to stop...'
       sleep WAIT
       i += WAIT
-      raise "Sidekiq didn't stop in #{i} seconds." if i >= STOP_TIMEOUT
+      raise "Sidekiq didn't stop in #{i} seconds." if i >= SIDEKIQ_TIMEOUT + 1
     end
   end
 

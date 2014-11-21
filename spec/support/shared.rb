@@ -1,4 +1,4 @@
-shared_context 'capture logs' do
+RSpec.shared_context 'capture logs' do
   let(:logger) { spy('logger') }
   let(:logs)   { [] }
 
