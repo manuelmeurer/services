@@ -7,11 +7,6 @@ rescue LoadError
   raise Services::BackgroundProcessorNotFound
 end
 
-begin
-  require 'sidetiq'
-rescue LoadError
-end
-
 module Services
   module Asyncable
     extend ActiveSupport::Concern
@@ -21,7 +16,6 @@ module Services
 
     included do
       include Sidekiq::Worker
-      include Sidetiq::Schedulable if defined?(Sidetiq)
     end
 
     module ClassMethods
