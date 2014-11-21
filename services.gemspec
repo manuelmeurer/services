@@ -28,6 +28,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'redis',       '~> 3.0'
   gem.add_development_dependency 'tries',       '~> 0.3'
   gem.add_development_dependency 'timecop',     '~> 0.7'
-  gem.add_runtime_dependency     'rails',       '>= 3.0.0'
+  gem.add_runtime_dependency     'rails',       '>= 3.2.0'
   gem.add_runtime_dependency     'gem_config',  '~> 0.3'
 end
