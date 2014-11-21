@@ -3,6 +3,7 @@ require 'tries'
 require 'redis'
 require 'sidekiq'
 require 'timecop'
+require 'active_support'
 require 'active_support/core_ext'
 
 require_relative '../lib/services'
