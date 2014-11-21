@@ -57,24 +57,4 @@ describe Services::Base do
       end
     end
   end
-
-  context 'when executed asynchronously' do
-    it 'finds its own worker' do
-      3.times { OwnWorkerService.perform_async }
-      jid = OwnWorkerService.perform_async
-      own_worker_data = wait_for { Services.configuration.redis.get(jid) }
-      own_worker_json = JSON.parse(own_worker_data)
-      expect(own_worker_json[2]['payload']['jid']).to eq(jid)
-    end
-
-    it 'finds its sibling workers' do
-      sibling_worker_jids = (1..3).map { SiblingWorkersService.perform_async }
-      jid = SiblingWorkersService.perform_async
-      sibling_worker_data = wait_for { Services.configuration.redis.get(jid) }
-      sibling_worker_json = JSON.parse(sibling_worker_data)
-      expect(sibling_worker_json.size).to eq(3)
-      expected_sibling_worker_jids = sibling_worker_json.map { |_, _, work| work['payload']['jid'] }
-      expect(expected_sibling_worker_jids).to match_array(sibling_worker_jids)
-    end
-  end
 end

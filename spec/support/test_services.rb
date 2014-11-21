@@ -131,28 +131,6 @@ class NonUniqueService < Services::Base
   end
 end
 
-class OwnWorkerService < Services::Base
-  def call
-    if own_worker.nil?
-      logger.error 'Could not find own worker!'
-    else
-      Services.configuration.redis.set self.jid, own_worker.to_json
-    end
-    sleep 0.5
-  end
-end
-
-class SiblingWorkersService < Services::Base
-  def call
-    if sibling_workers.empty?
-      logger.info 'No sibling workers found.'
-    else
-      Services.configuration.redis.set self.jid, sibling_workers.to_json
-    end
-    sleep 0.5
-  end
-end
-
 class NestedExceptionService < Services::Base
   NestedError1 = Class.new(Error)
   NestedError2 = Class.new(Error)
