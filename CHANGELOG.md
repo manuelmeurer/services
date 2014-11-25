@@ -1,3 +1,7 @@
+## 2.0.2
+
+* Make BaseFinder smarter, don't create SQL subquery if not necessary
+
 ## 2.0.1
 
 * Fix disabling call logging
