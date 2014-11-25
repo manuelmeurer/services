@@ -5,14 +5,20 @@ module Services
     def call(ids = [], conditions = {})
       ids, conditions = Array(ids), conditions.symbolize_keys
       special_conditions = conditions.extract!(:order, :limit, :page, :per_page)
-      scope = object_class
-        .select("DISTINCT #{object_class.table_name}.id")
-        .order("#{object_class.table_name}.id")
-      scope = scope.where(id: ids) unless ids.empty?
 
-      scope = process(scope, conditions)
+      object_table_id = "#{object_class.table_name}.id"
 
-      scope = object_class.where(id: scope)
+      scope = object_class.public_send(Rails::VERSION::MAJOR == 3 ? :scoped : :all)
+      scope = scope.where(object_table_id => ids) unless ids.empty?
+
+      unless conditions.empty?
+        scope = scope
+          .select("DISTINCT #{object_table_id}")
+          .order(object_table_id)
+        scope = process(scope, conditions)
+        scope = object_class.where(id: scope)
+      end
+
       special_conditions.each do |k, v|
         case k
         when :order
@@ -32,6 +38,7 @@ module Services
           raise ArgumentError, "Unexpected special condition: #{k}"
         end
       end
+
       scope
     end
   end
