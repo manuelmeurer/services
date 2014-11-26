@@ -6,6 +6,7 @@ describe Services::BaseFinder do
   let(:base_find) { Services::Models::BaseFind }
 
   it 'has call logging disabled by default' do
+    pending 'Rails has to be loaded to call BaseFinder'
     expect(base_find.call_logging_disabled).to eq(true)
     expect { base_find.call }.to_not change { logs }
   end
