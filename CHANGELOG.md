@@ -1,3 +1,7 @@
+## 2.1.0
+
+* Add `find_ids` and `find_id` helpers to base service
+
 ## 2.0.2
 
 * Make BaseFinder smarter, don't create SQL subquery if not necessary
