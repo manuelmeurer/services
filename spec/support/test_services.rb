@@ -67,6 +67,18 @@ module Services
         find_object id_or_object
       end
     end
+
+    class FindIdsTest < Services::Base
+      def call(ids_or_objects)
+        find_ids ids_or_objects
+      end
+    end
+
+    class FindIdTest < Services::Base
+      def call(id_or_object)
+        find_id id_or_object
+      end
+    end
   end
 end
 

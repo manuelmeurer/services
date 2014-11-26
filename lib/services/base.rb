@@ -25,12 +25,23 @@ module Services
 
     private
 
-    def find_objects(ids_or_objects, klass = object_class)
+    def _split_ids_and_objects(ids_or_objects, klass)
       ids_or_objects = Array(ids_or_objects)
       ids, objects = ids_or_objects.grep(Fixnum), ids_or_objects.grep(klass)
       if ids.size + objects.size < ids_or_objects.size
         raise "All params must be either #{klass.to_s.pluralize} or Fixnums: #{ids_or_objects.map { |id_or_object| [id_or_object.class, id_or_object.inspect].join(' - ')}}"
       end
+      [ids, objects]
+    end
+
+    def find_ids(ids_or_objects, klass = object_class)
+      ids, objects = _split_ids_and_objects(ids_or_objects, klass)
+      ids.concat objects.map(&:id) if objects.any?
+      ids
+    end
+
+    def find_objects(ids_or_objects, klass = object_class)
+      ids, objects = _split_ids_and_objects(ids_or_objects, klass)
       if ids.any?
         find_service = "Services::#{klass.to_s.pluralize}::Find"
         objects_from_ids = find_service.constantize.call(ids)
@@ -46,10 +57,12 @@ module Services
       objects
     end
 
-    def find_object(*args)
-      find_objects(*args).tap do |objects|
-        raise "Expected exactly one object but found #{objects.size}" unless objects.size == 1
-      end.first
+    %i(object id).each do |type|
+      define_method "find_#{type}" do |*args|
+        send("find_#{type.to_s.pluralize}", *args).tap do |objects_or_ids|
+          raise "Expected exactly one object or ID but found #{objects_or_ids.size}." unless objects_or_ids.size == 1
+        end.first
+      end
     end
 
     def object_class
