@@ -12,16 +12,18 @@ module Services
       end
 
       module ClassMethods
-        @call_logging_disabled = false
+        @_call_logging_disabled = false
 
-        attr_accessor :call_logging_disabled
+        def call_logging_disabled
+          @_call_logging_disabled
+        end
 
         def disable_call_logging
-          @call_logging_disabled = true
+          @_call_logging_disabled = true
         end
 
         def enable_call_logging
-          @call_logging_disabled = false
+          @_call_logging_disabled = false
         end
       end
 
