@@ -29,7 +29,7 @@ module Services
         if @similar_service_id = Services.configuration.redis.get(new_uniqueness_key)
           case on_error.to_sym
           when :fail
-            raise_not_unique_error
+            raise not_unique_error
           when :reschedule
             if error_count >= MAX_RETRIES
               raise not_unique_error(true)
