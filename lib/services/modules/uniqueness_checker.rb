@@ -62,7 +62,7 @@ module Services
       def not_unique_error(retried = false)
         message = "Service #{self.class} #{@id} with uniqueness args #{@uniqueness_args} is not unique, a similar service is already running: #{@similar_service_id}."
         message << " The service has been retried #{MAX_RETRIES} times." if retried
-        self.class::NotUniqueError, message
+        self.class::NotUniqueError.new(message)
       end
 
       def convert_for_rescheduling(arg)
