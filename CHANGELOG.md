@@ -1,3 +1,7 @@
+## 2.2.0
+
+* Add `on_error` option `return` to uniqueness checker
+
 ## 2.1.0
 
 * Add `find_ids` and `find_id` helpers to base service
