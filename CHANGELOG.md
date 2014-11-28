@@ -1,4 +1,4 @@
-## 2.2.2
+## 2.2.3
 
 * Add `on_error` option `return` to uniqueness checker
 
