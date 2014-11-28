@@ -22,47 +22,56 @@ module Services
 
       def check_uniqueness(*args, on_error: :fail)
         raise "on_error must be one of #{ON_ERROR.join(', ')}, but was #{on_error}" unless ON_ERROR.include?(on_error.to_sym)
-        raise 'Service args not found.' if @service_args.nil?
-        @uniqueness_args = args.empty? ? @service_args : args
-        new_uniqueness_key = uniqueness_key(@uniqueness_args)
-        raise "A uniqueness key with args #{@uniqueness_args.inspect} already exists." if @uniqueness_keys && @uniqueness_keys.include?(new_uniqueness_key)
-        if @similar_service_id = Services.configuration.redis.get(new_uniqueness_key)
-          case on_error.to_sym
-          when :fail
-            raise not_unique_error
-          when :reschedule
-            if error_count >= MAX_RETRIES
-              raise not_unique_error(true)
-            else
-              increase_error_count
-              reschedule
-            end
-          when :return
-            return not_unique_error
+        @_on_error = on_error
+        raise 'Service args not found.' if @_service_args.nil?
+        @_uniqueness_args = args.empty? ? @_service_args : args
+        new_uniqueness_key = uniqueness_key(@_uniqueness_args)
+        raise "A uniqueness key with args #{@_uniqueness_args.inspect} already exists." if @_uniqueness_keys && @_uniqueness_keys.include?(new_uniqueness_key)
+        if @_similar_service_id = Services.configuration.redis.get(new_uniqueness_key)
+          if on_error.to_sym == :ignore
+            return false
+          else
+            @_retries_exhausted = on_error.to_sym == :reschedule && error_count >= MAX_RETRIES
+            raise_not_unique_error
           end
-          false
         else
-          @uniqueness_keys ||= []
-          @uniqueness_keys << new_uniqueness_key
+          @_uniqueness_keys ||= []
+          @_uniqueness_keys << new_uniqueness_key
           Services.configuration.redis.setex new_uniqueness_key, ONE_HOUR, @id
           true
         end
       end
 
       def call(*args)
-        @service_args = args
+        @_service_args = args
         super
+      rescue self.class::NotUniqueError => e
+        case @_on_error.to_sym
+        when :fail
+          raise e
+        when :reschedule
+          if @_retries_exhausted
+            raise e
+          else
+            increase_error_count
+            reschedule
+          end
+        when :return
+          return e
+        else
+          raise "Unexpected on_error: #{@_on_error}"
+        end
       ensure
-        Services.configuration.redis.del @uniqueness_keys unless @uniqueness_keys.nil? || @uniqueness_keys.empty?
+        Services.configuration.redis.del @_uniqueness_keys unless @_uniqueness_keys.nil? || @_uniqueness_keys.empty?
         Services.configuration.redis.del error_count_key
       end
 
       private
 
-      def not_unique_error(retried = false)
-        message = "Service #{self.class} #{@id} with uniqueness args #{@uniqueness_args} is not unique, a similar service is already running: #{@similar_service_id}."
-        message << " The service has been retried #{MAX_RETRIES} times." if retried
-        self.class::NotUniqueError.new(message)
+      def raise_not_unique_error
+        message = "Service #{self.class} #{@id} with uniqueness args #{@_uniqueness_args} is not unique, a similar service is already running: #{@_similar_service_id}."
+        message << " The service has been retried #{MAX_RETRIES} times." if @_retries_exhausted
+        raise self.class::NotUniqueError.new(message)
       end
 
       def convert_for_rescheduling(arg)
@@ -82,7 +91,7 @@ module Services
 
       def reschedule
         # Convert service args for rescheduling first
-        reschedule_args = @service_args.map do |arg|
+        reschedule_args = @_service_args.map do |arg|
           convert_for_rescheduling arg
         end
         log "Rescheduling to be executed in #{retry_delay} seconds." if self.respond_to?(:log)
@@ -112,7 +121,7 @@ module Services
           'errors',
           self.class.to_s.gsub(':', '_')
         ].tap do |key|
-          key << Digest::MD5.hexdigest(@service_args.to_s) unless @service_args.empty?
+          key << Digest::MD5.hexdigest(@_service_args.to_s) unless @_service_args.empty?
         end.join(':')
       end
 
