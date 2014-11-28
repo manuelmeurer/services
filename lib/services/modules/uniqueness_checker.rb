@@ -10,6 +10,7 @@ module Services
         fail
         ignore
         reschedule
+        return
       )
 
       MAX_RETRIES = 10
@@ -28,14 +29,16 @@ module Services
         if @similar_service_id = Services.configuration.redis.get(new_uniqueness_key)
           case on_error.to_sym
           when :fail
-            raise_non_unique_error
+            raise_not_unique_error
           when :reschedule
             if error_count >= MAX_RETRIES
-              raise_non_unique_error
+              raise not_unique_error(true)
             else
               increase_error_count
               reschedule
             end
+          when :return
+            return not_unique_error
           end
           false
         else
@@ -56,10 +59,10 @@ module Services
 
       private
 
-      def raise_non_unique_error(retried = false)
+      def not_unique_error(retried = false)
         message = "Service #{self.class} #{@id} with uniqueness args #{@uniqueness_args} is not unique, a similar service is already running: #{@similar_service_id}."
-        message << " The service has been retried #{MAX_RETRIES} times."
-        raise self.class::NotUniqueError, message
+        message << " The service has been retried #{MAX_RETRIES} times." if retried
+        self.class::NotUniqueError, message
       end
 
       def convert_for_rescheduling(arg)
