@@ -14,7 +14,7 @@ module Services
       )
 
       MAX_RETRIES = 10
-      ONE_HOUR = 60 * 60
+      ONE_DAY     = 60 * 60 * 24
 
       def self.prepended(mod)
         mod.const_set :NotUniqueError, Class.new(mod::Error)
@@ -37,7 +37,7 @@ module Services
         else
           @_uniqueness_keys ||= []
           @_uniqueness_keys << new_uniqueness_key
-          Services.configuration.redis.setex new_uniqueness_key, ONE_HOUR, @id
+          Services.configuration.redis.setex new_uniqueness_key, ONE_DAY, @id
           true
         end
       end
@@ -103,7 +103,7 @@ module Services
       end
 
       def increase_error_count
-        Services.configuration.redis.setex error_count_key, retry_delay + ONE_HOUR, error_count + 1
+        Services.configuration.redis.setex error_count_key, retry_delay + ONE_DAY, error_count + 1
       end
 
       def uniqueness_key(args)
