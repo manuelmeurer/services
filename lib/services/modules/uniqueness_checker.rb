@@ -62,7 +62,7 @@ module Services
           raise "Unexpected on_error: #{@_on_error}"
         end
       ensure
-        Services.configuration.redis.del @_uniqueness_keys unless @_uniqueness_keys.nil? || @_uniqueness_keys.empty?
+        Services.configuration.redis.del @_uniqueness_keys unless Array(@_uniqueness_keys).empty?
         Services.configuration.redis.del error_count_key
       end
 
