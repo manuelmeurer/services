@@ -1,3 +1,8 @@
+## 2.2.4
+
+* Increase TTL for Redis keys for uniqueness and error count to one day
+* Fix ordering in `BaseFinder`
+
 ## 2.2.3
 
 * Add `on_error` option `return` to uniqueness checker
