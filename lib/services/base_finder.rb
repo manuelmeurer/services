@@ -4,28 +4,26 @@ module Services
 
     def call(ids = [], conditions = {})
       ids, conditions = Array(ids), conditions.symbolize_keys
-      special_conditions = conditions.extract!(:order, :limit, :page, :per_page)
-
       object_table_id = "#{object_class.table_name}.id"
+
+      special_conditions = conditions.extract!(:order, :limit, :page, :per_page)
+      special_conditions[:order] ||= object_table_id
 
       scope = object_class.public_send(Rails::VERSION::MAJOR == 3 ? :scoped : :all)
       scope = scope.where(object_table_id => ids) unless ids.empty?
 
       unless conditions.empty?
-        scope = scope
-          .select("DISTINCT #{object_table_id}")
-          .order(object_table_id)
         scope = process(scope, conditions)
-        scope = object_class.where(id: scope)
+        scope = object_class.where(id: scope.select("DISTINCT #{object_table_id}"))
       end
 
       special_conditions.each do |k, v|
         case k
         when :order
-          order = if v == 'random'
-            'RANDOM()'
-          else
-            "#{object_class.table_name}.#{v}"
+          order = case v
+          when 'random' then 'RANDOM()'
+          when /\./     then v
+          else               "#{object_class.table_name}.#{v}"
           end
           scope = scope.order(order)
         when :limit
