@@ -20,7 +20,7 @@ describe Services::Base::CallLogger do
       expect(logs.last).to match(
         message: 'END',
         meta: {
-          duration: 0.0,
+          duration: a_value_within(0.1).of(0.0),
           service:  service.class.to_s,
           id:       an_instance_of(String)
         },
