@@ -20,6 +20,7 @@ module Services
       special_conditions.each do |k, v|
         case k
         when :order
+          next unless v
           order = case v
           when 'random' then 'RANDOM()'
           when /\./     then v
