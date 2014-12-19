@@ -7,7 +7,7 @@ module Services
       object_table_id = "#{object_class.table_name}.id"
 
       special_conditions = conditions.extract!(:order, :limit, :page, :per_page)
-      special_conditions[:order] ||= object_table_id
+      special_conditions[:order] = object_table_id unless special_conditions.has_key?(:order)
 
       scope = object_class.public_send(Rails::VERSION::MAJOR == 3 ? :scoped : :all)
       scope = scope.where(object_table_id => ids) unless ids.empty?
