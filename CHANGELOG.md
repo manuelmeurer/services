@@ -1,3 +1,7 @@
+## 3.0.1
+
+* Fix for Ruby 2.0
+
 ## 3.0.0
 
 * Rename `BaseFinder` to `Query`
