@@ -1,4 +1,4 @@
-require 'services/base_finder'
+require 'services/query'
 
 class Model
   class << self
@@ -42,7 +42,7 @@ end
 
 module Services
   module Models
-    class BaseFind < Services::BaseFinder
+    class Query < Services::Query
       private
 
       def process(scope, conditions)

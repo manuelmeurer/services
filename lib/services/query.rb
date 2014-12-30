@@ -1,6 +1,10 @@
 module Services
-  class BaseFinder < Services::Base
-    disable_call_logging
+  class Query
+    include ObjectClass
+
+    class << self
+      delegate :call, to: :new
+    end
 
     def call(ids = [], conditions = {})
       ids, conditions = Array(ids), conditions.symbolize_keys
@@ -14,7 +18,10 @@ module Services
 
       unless conditions.empty?
         scope = process(scope, conditions)
-        scope = object_class.where(id: scope.select("DISTINCT #{object_table_id}"))
+        # If a JOIN is involved, use a subquery to make sure we're getting DISTINCT records.
+        if scope.to_sql =~ / join /i
+          scope = object_class.where(id: scope.select("DISTINCT #{object_table_id}"))
+        end
       end
 
       special_conditions.each do |k, v|

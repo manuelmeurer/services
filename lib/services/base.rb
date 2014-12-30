@@ -4,6 +4,8 @@ require 'digest'
 
 module Services
   class Base
+    include ObjectClass
+
     class << self
       def inherited(subclass)
         subclass.const_set :Error, Class.new(StandardError)
@@ -63,12 +65,6 @@ module Services
           raise "Expected exactly one object or ID but found #{objects_or_ids.size}." unless objects_or_ids.size == 1
         end.first
       end
-    end
-
-    def object_class
-      self.class.to_s[/Services::([^:]+)/, 1].singularize.constantize
-    rescue
-      raise "Could not determine service class from #{self.class}"
     end
 
     def controller
