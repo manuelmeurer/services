@@ -7,7 +7,7 @@ module Services
     end
 
     def call(ids = [], conditions = {})
-      raise self.class::Error, 'ids parameter must not be nil.' if ids.nil?
+      raise ArgumentError, 'ids parameter must not be nil.' if ids.nil?
 
       ids, conditions = Array(ids), conditions.symbolize_keys
       object_table_id = "#{object_class.table_name}.id"
