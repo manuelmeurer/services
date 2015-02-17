@@ -19,13 +19,9 @@ For disambiguation: when I write "Services" with a uppercase "S", I mean this ge
 
 ### Requirements
 
-### Ruby
+#### Ruby >= 2.0
 
-Ruby >= 2.0
-
-#### Rails
-
-Rails >= 3.2
+#### Rails >= 3.2
 
 #### Redis
 
