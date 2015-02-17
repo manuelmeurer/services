@@ -66,16 +66,5 @@ module Services
         end.first
       end
     end
-
-    def controller
-      @controller ||= begin
-        raise 'Please configure host.' if Services.configuration.host.nil?
-        request = ActionDispatch::TestRequest.new
-        request.host = Services.configuration.host
-        ActionController::Base.new.tap do |controller|
-          controller.instance_variable_set('@_request', request)
-        end
-      end
-    end
   end
 end

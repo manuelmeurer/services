@@ -6,7 +6,6 @@ module Services
   BackgroundProcessorNotFound = Class.new(StandardError)
 
   with_configuration do
-    has :host, classes: String
     has :logger
     has :redis
   end

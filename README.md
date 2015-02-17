@@ -144,7 +144,6 @@ Your services inherit from `Services::Base` which makes several helper methods a
 * `Rails.application.routes.url_helpers` is included so you use all Rails URL helpers.
 * `find_objects` and `find_object` let you automatically find object or a single object from an array of objects or object IDs, or a single object or object ID. The only difference is that `find_object` returns a single object whereas `find_objects` always returns an array.
 * `object_class` tries to figure out the class the service operates on. If you follow the service naming conventions and you have a service `Services::Products::Find`, `object_class` will return `Product`. Don't call it if you have a service like `Services::DoStuff` or it will raise an exception.
-* `controller` creates a `ActionController::Base` instance with an empty request. You can use it to call `render_to_string` to render a view from your service for example.
 
 Your services also automatically get a custom `Error` class, so you can `raise Error, 'Uh-oh, something has gone wrong!'` and a `Services::MyService::Error` will be raised.
 
