@@ -10,7 +10,8 @@ module Services
         Numeric
       ]
 
-      InvalidMetaError = Class.new(StandardError)
+      InvalidMetaError                 = Class.new(StandardError)
+      EmptyResponseFromRedisMultiError = Class.new(StandardError)
 
       def initialize(redis, key = 'logs')
         @redis, @key = redis, key
@@ -38,10 +39,13 @@ module Services
       end
 
       def clear
-        @redis.multi do
-          @redis.lrange @key, 0, -1
-          @redis.del @key
-        end.first.map(&method(:log_entry_from_json))
+        response = 3.tries on: EmptyResponseFromRedisMultiError do
+          @redis.multi do
+            @redis.lrange @key, 0, -1
+            @redis.del @key
+          end or raise EmptyResponseFromRedisMultiError
+        end
+        response.first.map(&method(:log_entry_from_json))
       end
 
       private
