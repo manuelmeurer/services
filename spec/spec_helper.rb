@@ -20,7 +20,6 @@ SIDEKIQ_TIMEOUT        = 20
 
 Dir[SUPPORT_DIR.join('**', '*.rb')].each { |f| require f }
 
-
 Services.configure do |config|
   config.redis = Redis.new
 end
