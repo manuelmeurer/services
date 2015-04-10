@@ -45,10 +45,6 @@ module Services
 
       private
 
-      def log(message, meta = {}, severity = 'info')
-        Services.configuration.logger.log message, meta.merge(service: self.class.to_s, id: @id), severity
-      end
-
       def exception_message(e)
         message = "#{e.class}: #{e.message}"
         e.backtrace.each do |line|

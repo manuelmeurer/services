@@ -27,6 +27,10 @@ module Services
 
     private
 
+    def log(message, meta = {}, severity = 'info')
+      Services.configuration.logger.log message, meta.merge(service: self.class.to_s, id: @id), severity
+    end
+
     def _split_ids_and_objects(ids_or_objects, klass)
       ids_or_objects = Array(ids_or_objects)
       ids, objects = ids_or_objects.grep(Fixnum), ids_or_objects.grep(klass)
