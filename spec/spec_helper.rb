@@ -17,6 +17,7 @@ SIDEKIQ_PIDFILE        = SUPPORT_DIR.join('sidekiq.pid')
 WAIT                   = 0.5
 START_TIMEOUT          = 5
 SIDEKIQ_TIMEOUT        = 20
+REDIS_PORT             = 6479
 
 Dir[SUPPORT_DIR.join('**', '*.rb')].each { |f| require f }
 
@@ -25,11 +26,11 @@ Services.configure do |config|
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { redis: 'redis://localhost:6379/0', namespace: 'sidekiq', size: 1 }
+  config.redis = { redis: "redis://localhost:#{REDIS_PORT}/0", namespace: 'sidekiq', size: 1 }
 end
 
 Sidekiq.configure_server do |config|
-  config.redis = { redis: 'redis://localhost:6379/0', namespace: 'sidekiq' }
+  config.redis = { redis: "redis://localhost:#{REDIS_PORT}/0", namespace: 'sidekiq' }
 end
 
 RSpec.configure do |config|

@@ -15,17 +15,23 @@ module ::Guard
     REDIS_CLI        = SPEC_SUPPORT_DIR.join('redis-cli')
     REDIS_PIDFILE    = SPEC_SUPPORT_DIR.join('redis.pid')
     REDIS_LOGFILE    = SPEC_SUPPORT_DIR.join('log', 'redis.log')
+    REDIS_PORT       = 6479
+
+    def self.options_to_string(options)
+      options.map { |k, v| "-#{'-' if k.length > 1}#{k} #{v}" }.join(' ')
+    end
 
     class OnStart
       def call(guard_class, event, *args)
-        redis_options = {
+        options = {
           daemonize:  'yes',
           dir:        SPEC_SUPPORT_DIR,
           dbfilename: 'redis.rdb',
           logfile:    REDIS_LOGFILE,
           pidfile:    REDIS_PIDFILE,
+          port:       REDIS_PORT
         }
-        system "#{REDIS_BIN} #{redis_options.map { |k, v| "--#{k} #{v}" }.join(' ')}"
+        system "#{REDIS_BIN} #{ServicesGemHelpers.options_to_string options}"
 
         i = 0
         while !File.exist?(REDIS_PIDFILE)
@@ -39,7 +45,10 @@ module ::Guard
 
     class OnStop
       def call(guard_class, event, *args)
-        system "#{REDIS_CLI} shutdown"
+        options = {
+          p: REDIS_PORT
+        }
+        system "#{REDIS_CLI} #{ServicesGemHelpers.options_to_string options} shutdown"
 
         i = 0
         while File.exist?(REDIS_PIDFILE)
