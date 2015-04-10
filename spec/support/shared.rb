@@ -14,6 +14,6 @@ RSpec.shared_context 'capture logs' do
   end
 
   after do
-    Services.configuration.logger = nil
+    Services.configuration.logger = Services::Logger::Null.new
   end
 end

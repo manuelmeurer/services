@@ -1,12 +1,14 @@
 require 'gem_config'
 
+require_relative 'services/logger/null'
+
 module Services
   include GemConfig::Base
 
   BackgroundProcessorNotFound = Class.new(StandardError)
 
   with_configuration do
-    has :logger
+    has :logger, default: Services::Logger::Null.new
     has :redis
   end
 end

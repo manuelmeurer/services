@@ -28,7 +28,6 @@ module Services
       end
 
       def call(*args)
-        return super if Services.configuration.logger.nil?
         unless self.class.call_logging_disabled
           log "START with args: #{args}", caller: caller
           start = Time.now
