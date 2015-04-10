@@ -1,3 +1,23 @@
+## 4.0.2
+
+* Add null logger
+
+## 4.0.1
+
+* Account for that `redis.multi` can return nil
+
+## 4.0.0
+
+* Remove host configuration and controller method
+
+## 3.1.1
+
+* Query does not have its own error, raise ArgumentError instead
+
+## 3.1.0
+
+* Verify that query ids parameter is not nil
+
 ## 3.0.1
 
 * Fix for Ruby 2.0
