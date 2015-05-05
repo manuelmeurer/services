@@ -1,3 +1,7 @@
+## 4.1.0
+
+* Add possibility to automatically convert condition objects to IDs in query
+
 ## 4.0.2
 
 * Add null logger
