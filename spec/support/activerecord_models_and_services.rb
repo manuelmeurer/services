@@ -27,7 +27,9 @@ module Services
     class FindRaiseConditions < Services::Query
       convert_condition_objects_to_ids :comment
 
-      private def process(scope, conditions)
+      private
+
+      def process(scope, conditions)
         raise conditions.to_json
       end
     end
@@ -39,7 +41,9 @@ module Services
     class Find < Services::Query
       convert_condition_objects_to_ids :comment
 
-      private def process(scope, conditions)
+      private
+
+      def process(scope, conditions)
         conditions.each do |k, v|
           case k
           when :title, :body
@@ -61,7 +65,9 @@ module Services
     class Find < Services::Query
       convert_condition_objects_to_ids :post
 
-      private def process(scope, conditions)
+      private
+
+      def process(scope, conditions)
         conditions.each do |k, v|
           case k
           when :body, :post_id
