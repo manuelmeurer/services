@@ -1,5 +1,3 @@
-require 'services/query'
-
 class Model
   class << self
     def table_name

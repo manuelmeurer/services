@@ -19,7 +19,9 @@ START_TIMEOUT          = 5
 SIDEKIQ_TIMEOUT        = 20
 REDIS_PORT             = 6479
 
-Dir[SUPPORT_DIR.join('**', '*.rb')].each { |f| require f }
+%w(shared helpers test_services).each do |file|
+  require SUPPORT_DIR.join(file)
+end
 
 Services.configure do |config|
   config.redis = Redis.new

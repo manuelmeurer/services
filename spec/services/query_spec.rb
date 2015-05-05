@@ -1,13 +1,25 @@
 require 'spec_helper'
+require SUPPORT_DIR.join('activerecord_models_and_services')
 
 describe Services::Query do
   include_context 'capture logs'
 
-  let(:base_find) { Services::Models::BaseFind }
-
   it 'has call logging disabled by default' do
-    pending 'Rails has to be loaded to call Query'
-    expect(base_find.call_logging_disabled).to eq(true)
-    expect { base_find.call }.to_not change { logs }
+    expect { Services::Posts::Find.call [] }.to_not change { logs }
+  end
+
+  describe '.convert_condition_objects_to_ids' do
+    let(:comment) { Comment.create! }
+    let(:comments) { (1..3).map { Comment.create! } }
+
+    it 'converts condition objects to ids' do
+      {
+        comment     => comment.id,
+        comments    => comments.map(&:id),
+        Comment.all => Comment.all.pluck(:id)
+      }.each do |condition_before, condition_after|
+        expect { Services::Posts::FindRaiseConditions.call [], comment: condition_before }.to raise_error({ comment_id: condition_after }.to_json)
+      end
+    end
   end
 end
