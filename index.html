@@ -1,34 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
+    <meta charset="UTF-8">
     <title>Services by krautcomputing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
-
   <body>
-    <header>
-      <div class="inner">
-        <h1>Services</h1>
-        <h2>A nifty service layer for your Rails app</h2>
-        <a href="https://github.com/krautcomputing/services" class="button"><small>View project on</small> GitHub</a>
-      </div>
-    </header>
+    <section class="page-header">
+      <h1 class="project-name">Services</h1>
+      <h2 class="project-tagline">A nifty service layer for your Rails app</h2>
+      <a href="https://github.com/krautcomputing/services" class="btn">View on GitHub</a>
+      <a href="https://github.com/krautcomputing/services/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/krautcomputing/services/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
+    <section class="main-content">
+      <h1>
 <a id="services" class="anchor" href="#services" aria-hidden="true"><span class="octicon octicon-link"></span></a>Services</h1>
 
 <p><a href="http://badge.fury.io/rb/services"><img src="https://badge.fury.io/rb/services.png" alt="Gem Version"></a>
@@ -36,69 +27,119 @@
 <a href="https://gemnasium.com/krautcomputing/services"><img src="https://gemnasium.com/krautcomputing/services.png" alt="Dependency Status"></a>
 <a href="https://codeclimate.com/github/krautcomputing/services"><img src="https://codeclimate.com/github/krautcomputing/services.png" alt="Code Climate"></a></p>
 
-<p>Services is a collection of modules and base classes that let you implement a nifty service layer in your Rails app.</p>
+<p>Services is a collection of modules and base classes that let you simply add a service layer to your Rails app.</p>
 
 <h2>
 <a id="motivation" class="anchor" href="#motivation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Motivation</h2>
 
-<p>A lot has been written about service layers in Rails apps. There are advantages and disadvantages of course, but after using Services since 2013 in several Rails apps, I must say that in my opinion the advantages far outweigh the disadvantages.</p>
+<p>A lot has been written about service layers (service objects, SOA, etc.) for Rails. There are of course advantages and disadvantages, but after using Services since 2013 in several Rails apps, I must say that in my opinion the advantages far outweigh the disadvantages.</p>
 
-<p><strong>The biggest benefit you get with a service layer is that it makes it much easier to reason about your application, find a bug, or implement new features, when all your business logic is in services, not scattered in models, controllers, helpers etc.</strong></p>
+<p><strong>The biggest benefit you get when using a service layer, in my opinion, is that it gets so much easier to reason about your application, find a bug, or implement new features, when all your business logic is in services, not scattered in models, controllers, helpers etc.</strong></p>
 
 <h2>
 <a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
 
-<p>For disambiguation, we let's write Services with a uppercase S when we mean this gem, and services with a lowercase s when we mean, well, the plural of service.</p>
+<p>For disambiguation: in this README, when you read "Services" with a uppercase "S", this gem is meant, whereas with "services", well, the plural of service is meant.</p>
+
+<h3>
+<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h3>
+
+<h4>
+<a id="ruby--20" class="anchor" href="#ruby--20" aria-hidden="true"><span class="octicon octicon-link"></span></a>Ruby &gt;= 2.0</h4>
+
+<h4>
+<a id="rails--32" class="anchor" href="#rails--32" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails &gt;= 3.2</h4>
+
+<h4>
+<a id="redis--28" class="anchor" href="#redis--28" aria-hidden="true"><span class="octicon octicon-link"></span></a>Redis &gt;= 2.8</h4>
+
+<p>Redis is used at several points, e.g. to store information about the currently running services, so you can enforce uniqueness for specific services, i.e. make sure no more than one instance of such a service is executed simultaneously.</p>
+
+<h4>
+<a id="postgres-optional" class="anchor" href="#postgres-optional" aria-hidden="true"><span class="octicon octicon-link"></span></a>Postgres (optional)</h4>
+
+<p>The SQL that <code>Services::Query</code> (discussed further down) generates is optimized for Postgres. It might work with other databases but it's not guaranteed. If you're not using Postgres, you can still use all other parts of Services, just don't use <code>Services::Query</code> or, even better, submit a <a href="https://github.com/krautcomputing/services/issues">pull request</a> that fixes it to work with your database!</p>
+
+<h4>
+<a id="sidekiq-optional" class="anchor" href="#sidekiq-optional" aria-hidden="true"><span class="octicon octicon-link"></span></a>Sidekiq (optional)</h4>
+
+<p>To process services in the background, Services uses <a href="https://github.com/mperham/sidekiq">Sidekiq</a>. If you don't need background processing, you can still use Services without Sidekiq. When you then try to enqueue a service for background processing, an exception will be raised. If you use Sidekiq, make sure to load the Services gem after the Sidekiq gem.</p>
 
 <h3>
 <a id="basic-principles" class="anchor" href="#basic-principles" aria-hidden="true"><span class="octicon octicon-link"></span></a>Basic principles</h3>
 
-<p>Services is based on a couple of basic principles of what a service should be and do in your Rails app:</p>
+<p>Services is based on a couple of basic principles around what a service should be and do in your app:</p>
+
+<p>A service...</p>
 
 <ul>
-<li>a service does one thing well (Unix philosophy)</li>
-<li>a service can be run synchronously (in the foreground) or asynchronously (in the background)</li>
-<li>a service can be unique, meaning only one instance of it should be run at a time</li>
-<li>a service logs all the things (start time, end time, caller, exceptions etc.)</li>
-<li>a service has its own exception class and all exceptions that it may raise must be of that class or a subclass</li>
-<li>a service can be called with one or multiple objects or one or multiple object IDs</li>
+<li>does only one thing and does it well (Unix philosophy)</li>
+<li>can be run synchronously (i.e. blocking/in the foreground) or asynchronously (i.e. non-blocking/in the background)</li>
+<li>can be configured as "unique", meaning only one instance of it should be run at any time (including or ignoring parameters)</li>
+<li>logs all the things (start time, end time, duration, caller, exceptions etc.)</li>
+<li>has its own exception class(es) which all exceptions that might be raised inherit from</li>
+<li>does not care whether certain parameters are objects or object IDs</li>
 </ul>
 
-<p>Apart from these basic principles, you can implement the actual logic in a service any way you want.</p>
+<p>Apart from these basic principles, you are free to implement the actual logic in a service any way you want.</p>
 
 <h3>
 <a id="conventions" class="anchor" href="#conventions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Conventions</h3>
 
-<p>Follow these conventions that Services expects/recommends:</p>
+<p>Follow these conventions when using Services in your Rails app, and you'll be fine:</p>
 
 <ul>
-<li>services inherit from <code>Services::Base</code> (or <code>Services::BaseFinder</code>)</li>
-<li>services are located in <code>app/services/</code>
+<li>Let your services inherit from <code>Services::Base</code>
 </li>
-<li>services are namespaced with the model they operate on and their names are verbs, e.g. <code>app/services/users/delete.rb</code> defines <code>Services::Users::Delete</code>. If a service operates on multiple models or no models at all, don't namespace them (<code>Services::DoLotsOfStuff</code>) or namespace them by logical groups unrelated to models (<code>Services::Maintenance::CleanOldUsers</code>, <code>Services::Maintenance::SendDailySummary</code>, etc.)</li>
-<li>Sometimes services must call other services. Try to not combine multiple calls to other services and business logic in one service. Instead, some services should contain only business logic and other services only a bunch of service calls but no (or little) business logic. This keeps your services nice and modular.</li>
+<li>Let your query objects inherit from <code>Services::Query</code>
+</li>
+<li>Put your services in <code>app/services/</code>
+</li>
+<li>Namespace your services with the model they operate on and give them "verb names", e.g. <code>app/services/users/delete.rb</code> defines <code>Services::Users::Delete</code>. If a service operates on multiple models or no models at all, don't namespace them (<code>Services::DoStuff</code>) or namespace them by logical groups unrelated to models (<code>Services::Maintenance::CleanOldStuff</code>, <code>Services::Maintenance::SendDailySummary</code>, etc.)</li>
+<li>Some services call other services. Try to not combine multiple calls to other services and business logic in one service. Instead, some services should contain only business logic and other services only a bunch of service calls but no (or little) business logic. This keeps your services nice and modular.</li>
 </ul>
 
 <h3>
-<a id="dependence" class="anchor" href="#dependence" aria-hidden="true"><span class="octicon octicon-link"></span></a>Dependence</h3>
+<a id="configuration" class="anchor" href="#configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Configuration</h3>
 
-<p>To process services in the background, Services uses <a href="https://github.com/mperham/sidekiq">Sidekiq</a>. Sidekiq is not absolutely required to use Services though, if it's not present, a service will raise an exception when you try to enqueue it for background processing. If you're using Sidekiq, make sure to load the Services gem after the Sidekiq gem.</p>
+<p>You can/should configure Services in an initializer:</p>
 
-<p>The SQL <code>Services::BaseFinder</code> (discussed further down) generates is optimized for Postgres. It might work with other databases but it's not guaranteed. If you're not using Postgres, don't use <code>Services::BaseFinder</code> or, even better, submit a PR that fixes it to work with your database!</p>
+<div class="highlight highlight-ruby"><pre><span class="pl-c"># config/initializers/services.rb</span>
+<span class="pl-c1">Services</span>.configure <span class="pl-k">do </span>|<span class="pl-smi">config</span>|
+  config.logger <span class="pl-k">=</span> <span class="pl-c1">Services</span>::<span class="pl-c1">Logger</span>::<span class="pl-c1">Redis</span>.<span class="pl-k">new</span>(<span class="pl-c1">Redis</span>.<span class="pl-k">new</span>)    <span class="pl-c"># see Logging</span>
+  config.redis  <span class="pl-k">=</span> <span class="pl-c1">Redis</span>.<span class="pl-k">new</span>                                 <span class="pl-c"># actually you should use a Redis connection pool</span>
+<span class="pl-k">end</span></pre></div>
 
 <h3>
-<a id="examples" class="anchor" href="#examples" aria-hidden="true"><span class="octicon octicon-link"></span></a>Examples</h3>
+<a id="rails-autoload-fix" class="anchor" href="#rails-autoload-fix" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rails autoload fix</h3>
 
-<p>The following service takes one or more users or user IDs as an argument.</p>
+<p>By default, Rails expects <code>app/services/users/delete.rb</code> to define <code>Users::Delete</code>, but we want it to expect <code>Services::Users::Delete</code>. To make this work, add the <code>app</code> folder to the autoload path:</p>
 
-<div class="highlight highlight-ruby"><pre><span class="pl-k">module</span> <span class="pl-entm">Services</span>
-  <span class="pl-k">module</span> <span class="pl-entm">Users</span>
-    <span class="pl-k">class</span> <span class="pl-entc">Delete<span class="pl-eoi"> &lt; Services::Base</span></span>
-      <span class="pl-k">def</span> <span class="pl-enf">call</span>(<span class="pl-vpf">ids_or_objects</span>)
-        users <span class="pl-ko">=</span> find_objects(ids_or_objects)
-        users.each <span class="pl-k">do </span>|<span class="pl-v">user</span>|
+<div class="highlight highlight-ruby"><pre><span class="pl-c"># config/application.rb</span>
+config.autoload_paths <span class="pl-k">+=</span> [config.root.join(<span class="pl-s"><span class="pl-pds">'</span>app<span class="pl-pds">'</span></span>)]</pre></div>
+
+<p>This looks as if it might break things, but I've never had any problems with it.</p>
+
+<h3>
+<a id="servicesbase" class="anchor" href="#servicesbase" aria-hidden="true"><span class="octicon octicon-link"></span></a>Services::Base</h3>
+
+<p><code>Services::Base</code> is the base class you should use for all your services. It gives you a couply of helper methods and defines a custom exception class for you.</p>
+
+<p>Read <a href="lib/services/base.rb">the source</a> to understand what it does in more detail.</p>
+
+<p>The following example service takes one or more users or user IDs as an argument and deletes the users:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="pl-k">module</span> <span class="pl-en">Services</span>
+  <span class="pl-k">module</span> <span class="pl-en">Users</span>
+    <span class="pl-k">class</span> <span class="pl-en">Delete<span class="pl-e"> &lt; Services::Base</span></span>
+      <span class="pl-k">def</span> <span class="pl-en">call</span>(<span class="pl-smi">ids_or_objects</span>)
+        users <span class="pl-k">=</span> find_objects(ids_or_objects)
+        users.each <span class="pl-k">do </span>|<span class="pl-smi">user</span>|
+          <span class="pl-k">if</span> user.posts.any?
+            <span class="pl-k">raise</span> <span class="pl-c1">Error</span>, <span class="pl-s"><span class="pl-pds">"</span>User <span class="pl-pse">#{</span><span class="pl-s1">user.id</span><span class="pl-pse"><span class="pl-s1">}</span></span> has one or more posts, refusing to delete.<span class="pl-pds">"</span></span>
+          <span class="pl-k">end</span>
           user.destroy
-          <span class="pl-sc">Mailer</span>.user_deleted(user).deliver
+          <span class="pl-c1">Mailer</span>.user_deleted(user).deliver
         <span class="pl-k">end</span>
         users
       <span class="pl-k">end</span>
@@ -106,26 +147,48 @@
   <span class="pl-k">end</span>
 <span class="pl-k">end</span></pre></div>
 
-<p>As you can see, the helper <code>find_objects</code> is used to make sure you are dealing with an array of users from that point on, no matter whether <code>ids_or_objects</code> is a single user ID or user, or an array of user IDs or users.</p>
+<p>This service can be called in several ways:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="pl-c"># Execute synchronously/in the foreground</span>
+
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Delete</span>.call <span class="pl-c1">User</span>.find(<span class="pl-c1">1</span>)                <span class="pl-c"># with a user object</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Delete</span>.call <span class="pl-c1">User</span>.where(<span class="pl-c1">id:</span> [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>])   <span class="pl-c"># with a ActiveRecord::Relation returning user objects</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Delete</span>.call [user1, user2, user3]       <span class="pl-c"># with an array of user objects</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Delete</span>.call <span class="pl-c1">1</span>                           <span class="pl-c"># with a user ID</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Delete</span>.call [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>]                   <span class="pl-c"># with an array of user IDs</span>
+
+<span class="pl-c"># Execute asynchronously/in the background</span>
+
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Delete</span>.perform_async <span class="pl-c1">1</span>                  <span class="pl-c"># with a user ID</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Delete</span>.perform_async [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>]          <span class="pl-c"># with multiple user IDs</span></pre></div>
+
+<p>As you can see, you cannot use objects or a ActiveRecord::Relation as parameters when calling a service asynchronously since the arguments are serialized to Redis. This might change once Services works with <a href="https://github.com/rails/rails/tree/master/activejob">ActiveJob</a> and <a href="https://github.com/rails/globalid/">GlobalID</a>.</p>
+
+<p>The helper <code>find_objects</code> is used to allow the <code>ids_or_objects</code> parameter to be a object, object ID, array or ActiveRecord::Relation, and make sure you we dealing with an array of objects from that point on.</p>
 
 <p>It's good practice to always return the objects a service has been operating on at the end of the service.</p>
 
-<p>Another example, this time using <code>Services::BaseFinder</code>:</p>
+<h3>
+<a id="servicesquery" class="anchor" href="#servicesquery" aria-hidden="true"><span class="octicon octicon-link"></span></a>Services::Query</h3>
 
-<div class="highlight highlight-ruby"><pre><span class="pl-k">module</span> <span class="pl-entm">Services</span>
-  <span class="pl-k">module</span> <span class="pl-entm">Users</span>
-    <span class="pl-k">class</span> <span class="pl-entc">Find<span class="pl-eoi"> &lt; Services::BaseFinder</span></span>
-      <span class="pl-kos">private</span> <span class="pl-k">def</span> <span class="pl-enf">process</span>(<span class="pl-vpf">scope</span>, <span class="pl-vpf">conditions</span>)
-        conditions.each <span class="pl-k">do </span>|<span class="pl-v">k</span>, <span class="pl-v">v</span>|
+<p><code>Services::Query</code> on the other hand should be the base class for all query objects.</p>
+
+<p>Here is an example that is used to find users:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="pl-k">module</span> <span class="pl-en">Services</span>
+  <span class="pl-k">module</span> <span class="pl-en">Users</span>
+    <span class="pl-k">class</span> <span class="pl-en">Find<span class="pl-e"> &lt; Services::Query</span></span>
+      convert_condition_objects_to_ids <span class="pl-c1">:post</span>
+
+      <span class="pl-k">private</span> <span class="pl-k">def</span> <span class="pl-en">process</span>(<span class="pl-smi">scope</span>, <span class="pl-smi">conditions</span>)
+        conditions.each <span class="pl-k">do </span>|<span class="pl-smi">k</span>, <span class="pl-smi">v</span>|
           <span class="pl-k">case</span> k
-          <span class="pl-k">when</span> <span class="pl-cos"><span class="pl-pdc1">:</span>email</span>, <span class="pl-cos"><span class="pl-pdc1">:</span>name</span>
-            scope <span class="pl-ko">=</span> scope.where(k =&gt; v)
-          <span class="pl-k">when</span> <span class="pl-cos"><span class="pl-pdc1">:</span>product_id</span>
-            scope <span class="pl-ko">=</span> scope.joins(<span class="pl-cos"><span class="pl-pdc1">:</span>products</span>).where(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s2"><span class="pl-sc">Product</span>.table_name</span><span class="pl-pse"><span class="pl-s2">}</span></span>.id<span class="pl-pds">"</span></span> =&gt; v)
-          <span class="pl-k">when</span> <span class="pl-cos"><span class="pl-pdc1">:</span>product_category_id</span>
-            scope <span class="pl-ko">=</span> scope.joins(<span class="pl-cos"><span class="pl-pdc1">:</span>product_categories</span>).where(<span class="pl-s1"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s2"><span class="pl-sc">ProductCategory</span>.table_name</span><span class="pl-pse"><span class="pl-s2">}</span></span>.id<span class="pl-pds">"</span></span> =&gt; v)
+          <span class="pl-k">when</span> <span class="pl-c1">:email</span>, <span class="pl-c1">:name</span>
+            scope <span class="pl-k">=</span> scope.where(k =&gt; v)
+          <span class="pl-k">when</span> <span class="pl-c1">:post_id</span>
+            scope <span class="pl-k">=</span> scope.joins(<span class="pl-c1">:posts</span>).where(<span class="pl-s"><span class="pl-pds">"</span><span class="pl-pse">#{</span><span class="pl-s1"><span class="pl-c1">Post</span>.table_name</span><span class="pl-pse"><span class="pl-s1">}</span></span>.id<span class="pl-pds">"</span></span> =&gt; v)
           <span class="pl-k">else</span>
-            <span class="pl-kos">raise</span> <span class="pl-v">ArgumentError</span>, <span class="pl-s1"><span class="pl-pds">"</span>Unexpected condition: <span class="pl-pse">#{</span><span class="pl-s2">k</span><span class="pl-pse"><span class="pl-s2">}</span></span><span class="pl-pds">"</span></span>
+            <span class="pl-k">raise</span> <span class="pl-c1">ArgumentError</span>, <span class="pl-s"><span class="pl-pds">"</span>Unexpected condition: <span class="pl-pse">#{</span><span class="pl-s1">k</span><span class="pl-pse"><span class="pl-s1">}</span></span><span class="pl-pds">"</span></span>
           <span class="pl-k">end</span>
         <span class="pl-k">end</span>
         scope
@@ -134,16 +197,40 @@
   <span class="pl-k">end</span>
 <span class="pl-k">end</span></pre></div>
 
-<p>Since you will create services to find objects for pretty much every model you have and they all look very similar, i.e. process the find conditions and return a <code>ActiveRecord::Relation</code>, you can let those services inherit from <code>Services::BaseFinder</code> to remove some of the boilerplate.</p>
+<p>A query object that inherits from <code>Services::Query</code> always receives two parameters: an array of IDs and a hash of conditions. It always returns an array, even if none or only one object is found.</p>
 
-<p><code>Services::BaseFinder</code> inherits from <code>Services::Base</code> and takes an array of IDs and a hash of conditions as parameters. It then extracts some special conditions (:order, :limit, :page, :per_page) that are handled separately and passes a <code>ActiveRecord::Relation</code> and the remaining conditions to the <code>process</code> method that the inheriting class must define. This method should handle all the conditions, extend the scope and return it.</p>
+<p>When you write your query objects, the only method you have to write is <code>process</code> (preferably make it private). This method does the actual querying for all non-standard parameters (more about standard vs. non-standard parameters below).</p>
 
-<p>Check out <a href="lib/services/base_finder.rb">the source of <code>Services::BaseFinder</code></a> to understand what it does in more detail.</p>
+<p>This is how <code>Services::Users::Find</code> can be called:</p>
+
+<div class="highlight highlight-ruby"><pre><span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Find</span>.call []                             <span class="pl-c"># find all users, neither filtered by IDs nor by conditions</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Find</span>.call [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>, <span class="pl-c1">3</span>]                      <span class="pl-c"># find users with ID 1, 2 or 3</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Find</span>.call <span class="pl-c1">1</span>                              <span class="pl-c"># find users with ID 1 (careful: returns an array containing this one user, if found, otherwise an empty array)</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Find</span>.call [], <span class="pl-c1">email:</span> <span class="pl-s"><span class="pl-pds">'</span>foo@bar.com<span class="pl-pds">'</span></span>       <span class="pl-c"># find users with this email address</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Find</span>.call [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>], <span class="pl-c1">post:</span> <span class="pl-c1">Post</span>.find(<span class="pl-c1">1</span>)     <span class="pl-c"># find users with ID 1 or 2 and having the post with ID 1</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Find</span>.call [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>], <span class="pl-c1">post:</span> [<span class="pl-c1">Post</span>.find(<span class="pl-c1">1</span>)]   <span class="pl-c"># same as above</span>
+<span class="pl-c1">Services</span>::<span class="pl-c1">Users</span>::<span class="pl-c1">Find</span>.call [<span class="pl-c1">1</span>, <span class="pl-c1">2</span>], <span class="pl-c1">post:</span> <span class="pl-c1">1</span>                <span class="pl-c"># same as above</span></pre></div>
+
+<p>Check out <a href="lib/services/query.rb">the source of <code>Services::Query</code></a> to understand what it does in more detail.</p>
+
+<h4>
+<a id="standard-vs-non-standard-parameters" class="anchor" href="#standard-vs-non-standard-parameters" aria-hidden="true"><span class="octicon octicon-link"></span></a>Standard vs. non-standard parameters</h4>
+
+<p>to be described...</p>
+
+<h4>
+<a id="convert_condition_objects_to_ids" class="anchor" href="#convert_condition_objects_to_ids" aria-hidden="true"><span class="octicon octicon-link"></span></a>convert_condition_objects_to_ids</h4>
+
+<p>As with service objects, you want to be able to pass objects or IDs as conditions to query objects as well, and be sure that they behave the same way. This is what <code>convert_condition_objects_to_ids :post</code> does in the previous example: it tells the service object to convert the <code>post</code> condition, if present, to <code>post_id</code>.</p>
+
+<p>For example, at some point in your app you have an array of posts and need to find the users that created these posts. <code>Services::Users::Find.call([], post: posts)</code> will find them for you. If you have a post ID on the other hand, simply use <code>Services::Users::Find.call([], post: post_id)</code>, or if you have a single post, use <code>Services::Users::Find.call([], post: post)</code>. Each of these calls will return an array of users, as you would expect.</p>
+
+<p><code>Services::Query</code> takes an array of IDs and a hash of conditions as parameters. It then extracts some special conditions (:order, :limit, :page, :per_page) that are handled separately and passes a <code>ActiveRecord::Relation</code> and the remaining conditions to the <code>process</code> method that the inheriting class must define. This method should handle all the conditions, extend the scope and return it.</p>
 
 <h3>
 <a id="helpers" class="anchor" href="#helpers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Helpers</h3>
 
-<p>Your services inherit from <code>Services::Base</code> which makes several helper methods available:</p>
+<p>Your services inherit from <code>Services::Base</code> which makes several helper methods available to them:</p>
 
 <ul>
 <li>
@@ -152,14 +239,22 @@
 <code>find_objects</code> and <code>find_object</code> let you automatically find object or a single object from an array of objects or object IDs, or a single object or object ID. The only difference is that <code>find_object</code> returns a single object whereas <code>find_objects</code> always returns an array.</li>
 <li>
 <code>object_class</code> tries to figure out the class the service operates on. If you follow the service naming conventions and you have a service <code>Services::Products::Find</code>, <code>object_class</code> will return <code>Product</code>. Don't call it if you have a service like <code>Services::DoStuff</code> or it will raise an exception.</li>
-<li>
-<code>controller</code> creates a <code>ActionController::Base</code> instance with an empty request. You can use it to call <code>render_to_string</code> to render a view from your service for example.</li>
 </ul>
 
-<p>Your services also automatically get a custom <code>Error</code> class, so you can <code>raise Error, 'Uh-oh, something has gone wrong!'</code> and a <code>Services::MyService::Error</code> will be raised.</p>
+<p>Your services also automatically get a custom <code>Error</code> class, so you can <code>raise Error, 'Uh-oh, something has gone wrong!'</code> in <code>Services::MyService</code> and a <code>Services::MyService::Error</code> will be raised.</p>
 
 <h3>
 <a id="logging" class="anchor" href="#logging" aria-hidden="true"><span class="octicon octicon-link"></span></a>Logging</h3>
+
+<p>You can choose between logging to Redis or to a file, or turn logging off. By default logging is turned off.</p>
+
+<h4>
+<a id="redis" class="anchor" href="#redis" aria-hidden="true"><span class="octicon octicon-link"></span></a>Redis</h4>
+
+<p>to be described...</p>
+
+<h4>
+<a id="file" class="anchor" href="#file" aria-hidden="true"><span class="octicon octicon-link"></span></a>File</h4>
 
 <p>to be described...</p>
 
@@ -177,11 +272,6 @@
 <a id="backgroundasynchronous-processing" class="anchor" href="#backgroundasynchronous-processing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Background/asynchronous processing</h3>
 
 <p>to be described...</p>
-
-<h2>
-<a id="requirements" class="anchor" href="#requirements" aria-hidden="true"><span class="octicon octicon-link"></span></a>Requirements</h2>
-
-<p>Ruby &gt;= 2.0</p>
 
 <h2>
 <a id="installation" class="anchor" href="#installation" aria-hidden="true"><span class="octicon octicon-link"></span></a>Installation</h2>
@@ -211,25 +301,21 @@
 <li>Push to the branch (<code>git push origin my-new-feature</code>)</li>
 <li>Create new Pull Request</li>
 </ol>
-        </section>
 
-        <aside id="sidebar">
-          <a href="https://github.com/krautcomputing/services/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/krautcomputing/services/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
+<h2>
+<a id="testing" class="anchor" href="#testing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Testing</h2>
 
-          <p class="repo-owner"><a href="https://github.com/krautcomputing/services"></a> is maintained by <a href="https://github.com/krautcomputing">krautcomputing</a>.</p>
+<p>You need Redis to run tests, check out the <a href="Guardfile">Guardfile</a> which loads it automatically when you start Guard!</p>
 
-          <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
-      </div>
-    </div>
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/krautcomputing/services">Services</a> is maintained by <a href="https://github.com/krautcomputing">krautcomputing</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
 
   
   </body>
 </html>
+
