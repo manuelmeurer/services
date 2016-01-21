@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Services::Logger::Redis do
   let(:key)    { 'custom_log_key' }
-  let(:redis)  { Redis.new }
+  let(:redis)  { Redis.new(url: REDIS_URL) }
   let(:logger) { described_class.new(redis, key) }
   let(:logs) {
     [

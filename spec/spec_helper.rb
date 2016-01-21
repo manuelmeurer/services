@@ -17,22 +17,22 @@ SIDEKIQ_PIDFILE        = SUPPORT_DIR.join('sidekiq.pid')
 WAIT                   = 0.5
 START_TIMEOUT          = 5
 SIDEKIQ_TIMEOUT        = 20
-REDIS_PORT             = 6479
+REDIS_URL              = 'redis://localhost:6479/0'
 
 %w(shared helpers test_services).each do |file|
   require SUPPORT_DIR.join(file)
 end
 
 Services.configure do |config|
-  config.redis = Redis.new
+  config.redis = Redis.new(url: REDIS_URL)
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { redis: "redis://localhost:#{REDIS_PORT}/0", namespace: 'sidekiq', size: 1 }
+  config.redis = { url: REDIS_URL, namespace: 'sidekiq', size: 1 }
 end
 
 Sidekiq.configure_server do |config|
-  config.redis = { redis: "redis://localhost:#{REDIS_PORT}/0", namespace: 'sidekiq' }
+  config.redis = { url: REDIS_URL, namespace: 'sidekiq' }
 end
 
 RSpec.configure do |config|
