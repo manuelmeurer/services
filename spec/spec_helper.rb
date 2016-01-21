@@ -17,7 +17,7 @@ SIDEKIQ_PIDFILE        = SUPPORT_DIR.join('sidekiq.pid')
 WAIT                   = 0.5
 START_TIMEOUT          = 5
 SIDEKIQ_TIMEOUT        = 20
-REDIS_URL              = 'redis://localhost:6479/0'
+REDIS_URL              = 'redis://localhost:6379/0'
 
 %w(shared helpers test_services).each do |file|
   require SUPPORT_DIR.join(file)

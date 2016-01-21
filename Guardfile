@@ -15,7 +15,7 @@ module ::Guard
     REDIS_CLI        = SPEC_SUPPORT_DIR.join('redis-cli')
     REDIS_PIDFILE    = SPEC_SUPPORT_DIR.join('redis.pid')
     REDIS_LOGFILE    = SPEC_SUPPORT_DIR.join('log', 'redis.log')
-    REDIS_PORT       = 6479
+    REDIS_PORT       = 6379
 
     def self.options_to_string(options)
       options.map { |k, v| "-#{'-' if k.length > 1}#{k} #{v}" }.join(' ')
