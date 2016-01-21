@@ -45,7 +45,7 @@ describe Services::Base do
     context 'when passing in something else than a single object or ID' do
       it 'raises an error' do
         [%w(foo bar), nil, Object.new].each do |object|
-          expect { Services::Models::FindObjectTest.call(object) }.to raise_error
+          expect { Services::Models::FindObjectTest.call(object) }.to raise_error(Services::Models::FindObjectTest::Error)
         end
       end
     end
@@ -91,7 +91,7 @@ describe Services::Base do
     context 'when passing in something else than a single object or ID' do
       it 'raises an error' do
         [%w(foo bar), nil, Object.new].each do |object|
-          expect { Services::Models::FindIdTest.call(object) }.to raise_error
+          expect { Services::Models::FindIdTest.call(object) }.to raise_error(Services::Models::FindIdTest::Error)
         end
       end
     end
