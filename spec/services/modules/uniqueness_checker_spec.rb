@@ -77,7 +77,7 @@ shared_examples 'checking the uniqueness properly' do
 
     # Check that all Redis keys are deleted
     key_pattern = "#{described_class::KEY_PREFIX}*"
-    expect(Services.configuration.redis.keys(key_pattern)).to be_empty
+    expect(Services.redis.keys(key_pattern)).to be_empty
   end
 end
 

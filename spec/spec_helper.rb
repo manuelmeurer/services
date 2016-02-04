@@ -23,9 +23,7 @@ REDIS_URL              = 'redis://localhost:6379/0'
   require SUPPORT_DIR.join(file)
 end
 
-Services.configure do |config|
-  config.redis = Redis.new(url: REDIS_URL)
-end
+Redis.current = Redis.new(url: REDIS_URL)
 
 Sidekiq.configure_client do |config|
   config.redis = { url: REDIS_URL, namespace: 'sidekiq', size: 1 }

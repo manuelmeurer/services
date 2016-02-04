@@ -27,7 +27,7 @@ module Services
         @_uniqueness_args = args.empty? ? @_service_args : args
         new_uniqueness_key = uniqueness_key(@_uniqueness_args)
         raise "A uniqueness key with args #{@_uniqueness_args.inspect} already exists." if @_uniqueness_keys && @_uniqueness_keys.include?(new_uniqueness_key)
-        if @_similar_service_id = Services.configuration.redis.get(new_uniqueness_key)
+        if @_similar_service_id = Services.redis.get(new_uniqueness_key)
           if on_error.to_sym == :ignore
             return false
           else
@@ -37,7 +37,7 @@ module Services
         else
           @_uniqueness_keys ||= []
           @_uniqueness_keys << new_uniqueness_key
-          Services.configuration.redis.setex new_uniqueness_key, ONE_DAY, @id
+          Services.redis.setex new_uniqueness_key, ONE_DAY, @id
           true
         end
       end
@@ -62,8 +62,8 @@ module Services
           raise "Unexpected on_error: #{@_on_error}"
         end
       ensure
-        Services.configuration.redis.del @_uniqueness_keys unless Array(@_uniqueness_keys).empty?
-        Services.configuration.redis.del error_count_key
+        Services.redis.del @_uniqueness_keys unless Array(@_uniqueness_keys).empty?
+        Services.redis.del error_count_key
       end
 
       private
@@ -99,11 +99,11 @@ module Services
       end
 
       def error_count
-        (Services.configuration.redis.get(error_count_key) || 0).to_i
+        (Services.redis.get(error_count_key) || 0).to_i
       end
 
       def increase_error_count
-        Services.configuration.redis.setex error_count_key, retry_delay + ONE_DAY, error_count + 1
+        Services.redis.setex error_count_key, retry_delay + ONE_DAY, error_count + 1
       end
 
       def uniqueness_key(args)

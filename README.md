@@ -68,7 +68,8 @@ You can/should configure Services in an initializer:
 # config/initializers/services.rb
 Services.configure do |config|
   config.logger = Services::Logger::Redis.new(Redis.new)    # see Logging
-  config.redis  = Redis.new                                 # actually you should use a Redis connection pool
+  config.redis  = Redis.new                                 # optional, if Redis.current is defined. Otherwise it is recommended to use
+                                                            # a [connection pool](https://github.com/mperham/connection_pool).
 end
 ```
 

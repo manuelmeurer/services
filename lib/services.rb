@@ -6,10 +6,15 @@ module Services
   include GemConfig::Base
 
   BackgroundProcessorNotFound = Class.new(StandardError)
+  RedisNotFound               = Class.new(StandardError)
 
   with_configuration do
     has :logger, default: Services::Logger::Null.new
     has :redis
+  end
+
+  def self.redis
+    @redis ||= self.configuration.redis || (defined?(Redis.current) && Redis.current) or fail RedisNotFound, 'Redis not configured.'
   end
 end
 
