@@ -1,3 +1,11 @@
+## 4.1.2
+
+* Make "Services" namespace optional when determining object class
+
+## 4.1.1
+
+* Try to determine Redis connection from `Redis.current` if not explicitly set in configuration
+
 ## 4.1.0
 
 * Add possibility to automatically convert condition objects to IDs in query
