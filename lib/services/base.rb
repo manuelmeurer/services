@@ -46,11 +46,16 @@ module Services
       ids
     end
 
+    def find_service(klass)
+      find_service_name = "#{klass.to_s.pluralize}::Find"
+      candidates = [find_service_name, "Services::#{find_service_name}"]
+      candidates.map(&:safe_constantize).compact.first or raise self.class::Error, "Could not find find service (tried: #{candidates.join(', ')})"
+    end
+
     def find_objects(ids_or_objects, klass = object_class)
       ids, objects = _split_ids_and_objects(ids_or_objects, klass)
       if ids.any?
-        find_service = "Services::#{klass.to_s.pluralize}::Find"
-        objects_from_ids = find_service.constantize.call(ids)
+        objects_from_ids = find_service(klass).call(ids)
         object_ids = if objects_from_ids.respond_to?(:pluck)
           objects_from_ids.pluck(:id)
         else
