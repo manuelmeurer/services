@@ -1,3 +1,7 @@
+## 4.1.3
+
+* Fix finding the find service class
+
 ## 4.1.2
 
 * Make "Services" namespace optional when determining object class
