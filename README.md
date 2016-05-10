@@ -19,7 +19,7 @@ For disambiguation: in this README, when you read "Services" with a uppercase "S
 
 ### Requirements
 
-#### Ruby >= 2.0
+#### Ruby >= 2.2.3
 
 #### Rails >= 3.2
 
