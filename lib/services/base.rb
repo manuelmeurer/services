@@ -48,8 +48,12 @@ module Services
 
     def find_service(klass)
       find_service_name = "#{klass.to_s.pluralize}::Find"
-      candidates = [find_service_name, "Services::#{find_service_name}"]
-      candidates.map(&:safe_constantize).compact.first or raise self.class::Error, "Could not find find service (tried: #{candidates.join(', ')})"
+      candidates = ["Services::#{find_service_name}", find_service_name]
+      # Use a lazy enumerator here because attempting to
+      # constantize the find service without a namespace
+      # might raise a circular dependency error if it has
+      # a namespace
+      candidates.lazy.map(&:safe_constantize).detect(&:itself) or raise self.class::Error, "Could not find find service (tried: #{candidates.join(', ')})"
     end
 
     def find_objects(ids_or_objects, klass = object_class)
