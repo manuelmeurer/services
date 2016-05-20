@@ -57,7 +57,8 @@ Follow these conventions when using Services in your Rails app, and you'll be fi
 * Let your services inherit from `Services::Base`
 * Let your query objects inherit from `Services::Query`
 * Put your services in `app/services/`
-* Namespace your services with the model they operate on and give them "verb names", e.g. `app/services/users/delete.rb` defines `Services::Users::Delete`. If a service operates on multiple models or no models at all, don't namespace them (`Services::DoStuff`) or namespace them by logical groups unrelated to models (`Services::Maintenance::CleanOldStuff`, `Services::Maintenance::SendDailySummary`, etc.)
+* Decide if you want to use a `Services` namespace or not. Namespacing your service allows you to use a name for them that some other class or module in your app has (e.g. you can have a `Services::Maintenance` service, yet also a `Maintenance` module in `lib`). Not using a namespace saves you from writing `Services::` everytime you want to reference a service in your app. Both approaches are fine, pick one and stick to it.
+* Give your services "verby" names, e.g. `app/services/users/delete.rb` defines `Users::Delete` (or `Services::Users::Delete`, see above). If a service operates on multiple models or no models at all, don't namespace them (`Services::DoStuff`) or namespace them by logical groups unrelated to models (`Services::Maintenance::CleanOldStuff`, `Services::Maintenance::SendDailySummary`, etc.)
 * Some services call other services. Try to not combine multiple calls to other services and business logic in one service. Instead, some services should contain only business logic and other services only a bunch of service calls but no (or little) business logic. This keeps your services nice and modular.
 
 ### Configuration
@@ -67,22 +68,22 @@ You can/should configure Services in an initializer:
 ```ruby
 # config/initializers/services.rb
 Services.configure do |config|
-  config.logger = Services::Logger::Redis.new(Redis.new)    # see Logging
-  config.redis  = Redis.new                                 # optional, if Redis.current is defined. Otherwise it is recommended to use
-                                                            # a [connection pool](https://github.com/mperham/connection_pool).
+  config.logger = Services::Logger::Redis.new(Redis.new)    # see [Logging](#Logging)
+  config.redis  = Redis.new                                 # optional, if `Redis.current` is defined. Otherwise it is recommended to use
+                                                            # a [connection pool](https://github.com/mperham/connection_pool) here instead of simply `Redis.new`.
 end
 ```
 
-### Rails autoload fix
+### Rails autoload fix for `Services` namespace
 
-By default, Rails expects `app/services/users/delete.rb` to define `Users::Delete`, but we want it to expect `Services::Users::Delete`. To make this work, add the `app` folder to the autoload path:
+By default, Rails expects `app/services/users/delete.rb` to define `Users::Delete`. If you want to use the `Services` namespace for your services, we want it to expect `Services::Users::Delete`. To make this work, add the `app` folder to the autoload path:
 
 ```ruby
 # config/application.rb
 config.autoload_paths += [config.root.join('app')]
 ```
 
-This looks as if it might break things, but I've never had any problems with it.
+This looks as if it might break things, but AFAIK it has never cause problems so far.
 
 ### Services::Base
 
@@ -227,7 +228,7 @@ to be described...
 
 ### Background/asynchronous processing
 
-to be described...
+Each service can run synchronously (i.e. blocking/in the foreground) or asynchronously (i.e. non-blocking/in the background). If you want to run a service in the background, make sure it takes only arguments that can be serialized without problems (i.e. integers, strings, etc.). The background processing is done by Sidekiq, so you must set up Sidekiq in the Services initializer.
 
 ## Installation
 
