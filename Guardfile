@@ -62,7 +62,7 @@ module ::Guard
   end
 end
 
-guard 'rspec', cmd: 'bundle exec rspec' do
+guard 'rspec', cmd: 'bundle exec appraisal rspec' do
   callback ServicesGemHelpers::OnStart.new, :start_begin
   callback ServicesGemHelpers::OnStop.new,  :stop_begin
 

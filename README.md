@@ -21,7 +21,7 @@ For disambiguation: in this README, when you read "Services" with a uppercase "S
 
 #### Ruby >= 2.2.3
 
-#### Rails >= 3.2
+#### Rails >= 4.0
 
 #### Redis >= 2.8
 
