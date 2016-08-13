@@ -60,7 +60,7 @@ module Services
       ids, objects = _split_ids_and_objects(ids_or_objects, klass)
       if ids.any?
         objects_from_ids = find_service(klass).call(ids)
-        object_ids = if objects_from_ids.respond_to?(:pluck)
+        object_ids = if objects_from_ids.is_a?(ActiveRecord::Relation)
           objects_from_ids.pluck(:id)
         else
           objects_from_ids.map(&:id)
