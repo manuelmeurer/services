@@ -32,14 +32,14 @@ module Services
 
       ASYNC_METHOD_SUFFIXES.each do |async_method_suffix|
         define_method "call_#{async_method_suffix}" do |*args|
-          self.send "perform_#{async_method_suffix}", *args
+          self.public_send "perform_#{async_method_suffix}", *args
         end
       end
     end
 
     ASYNC_METHOD_SUFFIXES.each do |async_method_suffix|
       define_method "call_#{async_method_suffix}" do |*args|
-        self.class.send "perform_#{async_method_suffix}", *args, TARGET_PARAM_NAME => self.id
+        self.class.public_send "perform_#{async_method_suffix}", *args, TARGET_PARAM_NAME => self.id
       end
     end
 
@@ -52,7 +52,7 @@ module Services
         self.class
       end
 
-      target.send *args
+      target.public_send *args
     end
   end
 end

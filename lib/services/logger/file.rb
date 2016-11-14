@@ -14,7 +14,7 @@ module Services
           [k, v].join('=')
         end
         @logger.tagged Time.now, severity.upcase, *tags do
-          @logger.send severity, message
+          @logger.public_send severity, message
         end
       end
     end

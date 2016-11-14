@@ -9,9 +9,9 @@ module Services
     class << self
       def inherited(subclass)
         subclass.const_set :Error, Class.new(StandardError)
-        subclass.send :include, Rails.application.routes.url_helpers if defined?(Rails)
-        subclass.send :include, Asyncable if defined?(Asyncable)
-        subclass.send :prepend, CallLogger, ExceptionWrapper, UniquenessChecker
+        subclass.public_send :include, Rails.application.routes.url_helpers if defined?(Rails)
+        subclass.public_send :include, Asyncable if defined?(Asyncable)
+        subclass.public_send :prepend, CallLogger, ExceptionWrapper, UniquenessChecker
       end
 
       delegate :call, to: :new
