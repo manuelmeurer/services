@@ -8,7 +8,7 @@ module Services
         Symbol,
         String,
         Numeric
-      ]
+      ].freeze
 
       InvalidMetaError                 = Class.new(StandardError)
       EmptyResponseFromRedisMultiError = Class.new(StandardError)

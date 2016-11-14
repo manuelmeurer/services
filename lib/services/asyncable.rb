@@ -12,9 +12,9 @@ module Services
     extend ActiveSupport::Concern
 
     # The name of the parameter that is added to the parameter list when calling a method to be processed in the background.
-    TARGET_PARAM_NAME = :async_target_id
+    TARGET_PARAM_NAME = :async_target_id.freeze
 
-    ASYNC_METHOD_SUFFIXES = %i(async in at)
+    ASYNC_METHOD_SUFFIXES = %i(async in at).freeze
 
     included do
       include Sidekiq::Worker

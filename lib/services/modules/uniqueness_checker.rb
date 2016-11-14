@@ -4,17 +4,17 @@ module Services
       KEY_PREFIX = %w(
         services
         uniqueness
-      ).join(':')
+      ).join(':').freeze
 
       ON_ERROR = %i(
         fail
         ignore
         reschedule
         return
-      )
+      ).freeze
 
-      MAX_RETRIES = 10
-      ONE_DAY     = 60 * 60 * 24
+      MAX_RETRIES = 10.freeze
+      ONE_DAY     = (60 * 60 * 24).freeze
 
       def self.prepended(mod)
         mod.const_set :NotUniqueError, Class.new(mod::Error)
