@@ -126,8 +126,8 @@ Services::Users::Delete.call [1, 2, 3]                   # with an array of user
 
 # Execute asynchronously/in the background
 
-Services::Users::Delete.perform_async 1                  # with a user ID
-Services::Users::Delete.perform_async [1, 2, 3]          # with multiple user IDs
+Services::Users::Delete.call_async 1                     # with a user ID
+Services::Users::Delete.call_async [1, 2, 3]             # with multiple user IDs
 ```
 
 As you can see, you cannot use objects or a ActiveRecord::Relation as parameters when calling a service asynchronously since the arguments are serialized to Redis. This might change once Services works with [ActiveJob](https://github.com/rails/rails/tree/master/activejob) and [GlobalID](https://github.com/rails/globalid/).

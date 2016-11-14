@@ -14,6 +14,8 @@ module Services
     # The name of the parameter that is added to the parameter list when calling a method to be processed in the background.
     TARGET_PARAM_NAME = :async_target_id
 
+    ASYNC_METHOD_SUFFIXES = %i(async in at)
+
     included do
       include Sidekiq::Worker
     end
@@ -22,19 +24,24 @@ module Services
       # Bulk enqueue items
       # args can either be a one-dimensional or two-dimensional array,
       # each item in args should be the arguments for one job.
-      def bulk_perform_async(args)
-        # Convert args to two-dimensional array if it isn't already.
+      def bulk_call_async(args)
+        # Convert args to two-dimensional array if it isn't one already.
         args = args.map { |arg| [arg] } if args.none? { |arg| arg.is_a?(Array) }
         Sidekiq::Client.push_bulk 'class' => self, 'args' => args
       end
-    end
 
-    %w(perform_async perform_in).each do |method_name|
-      define_method method_name do |*args|
-        self.class.send method_name, *args, TARGET_PARAM_NAME => self.id
+      ASYNC_METHOD_SUFFIXES.each do |async_method_suffix|
+        define_method "call_#{async_method_suffix}" do |*args|
+          self.send "perform_#{async_method_suffix}", *args
+        end
       end
     end
-    alias_method :perform_at, :perform_in
+
+    ASYNC_METHOD_SUFFIXES.each do |async_method_suffix|
+      define_method "call_#{async_method_suffix}" do |*args|
+        self.class.send "perform_#{async_method_suffix}", *args, TARGET_PARAM_NAME => self.id
+      end
+    end
 
     def perform(*args)
       return self.call(*args) if self.is_a?(Services::Base)
