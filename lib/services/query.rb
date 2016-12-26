@@ -23,7 +23,7 @@ module Services
       special_conditions = conditions.extract!(:order, :limit, :page, :per_page)
       special_conditions[:order] = object_table_id unless special_conditions.has_key?(:order)
 
-      scope = object_class.public_send(ActiveRecord::VERSION::MAJOR == 3 ? :scoped : :all)
+      scope = conditions.delete(:scope) || object_class.public_send(ActiveRecord::VERSION::MAJOR == 3 ? :scoped : :all)
       scope = scope.where(object_table_id => ids) unless ids.empty?
 
       unless conditions.empty?
