@@ -21,15 +21,16 @@ Gem::Specification.new do |gem|
   gem.test_files            = gem.files.grep(%r(^(test|spec|features)/))
   gem.require_paths         = ['lib']
 
-  gem.add_development_dependency 'rake',        '>= 0.9.0'
-  gem.add_development_dependency 'guard-rspec', '~> 4.2'
-  gem.add_development_dependency 'rspec',       '~> 3.0'
-  gem.add_development_dependency 'sidekiq',     '~> 3.0'
-  gem.add_development_dependency 'redis',       '~> 3.0'
-  gem.add_development_dependency 'tries',       '~> 0.3'
-  gem.add_development_dependency 'timecop',     '~> 0.7'
-  gem.add_development_dependency 'sqlite3',     '~> 1.3'
-  gem.add_development_dependency 'appraisal',   '~> 2.1'
-  gem.add_runtime_dependency     'rails',       '>= 4.0.0'
-  gem.add_runtime_dependency     'gem_config',  '~> 0.3'
+  gem.add_development_dependency 'rake',            '>= 0.9.0'
+  gem.add_development_dependency 'guard-rspec',     '~> 4.2'
+  gem.add_development_dependency 'rspec',           '~> 3.0'
+  gem.add_development_dependency 'sidekiq',         '~> 4.0'
+  gem.add_development_dependency 'redis',           '~> 3.0'
+  gem.add_development_dependency 'redis-namespace', '~> 1.5'
+  gem.add_development_dependency 'tries',           '~> 0.3'
+  gem.add_development_dependency 'timecop',         '~> 0.7'
+  gem.add_development_dependency 'sqlite3',         '~> 1.3'
+  gem.add_development_dependency 'appraisal',       '~> 2.1'
+  gem.add_runtime_dependency     'rails',           '>= 4.0.0'
+  gem.add_runtime_dependency     'gem_config',      '~> 0.3'
 end
