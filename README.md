@@ -19,11 +19,11 @@ For disambiguation: in this README, when you read "Services" with a uppercase "S
 
 ### Requirements
 
-#### Ruby >= 2.2.3
+#### Ruby >= 2.2.5
 
 #### Rails >= 4.0
 
-#### Redis >= 2.8
+#### Redis >= 3.0
 
 Redis is used at several points, e.g. to store information about the currently running services, so you can enforce uniqueness for specific services, i.e. make sure no more than one instance of such a service is executed simultaneously.
 
