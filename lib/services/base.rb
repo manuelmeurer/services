@@ -1,3 +1,4 @@
+require 'active_record'
 require 'securerandom'
 require 'action_dispatch'
 require 'digest'
