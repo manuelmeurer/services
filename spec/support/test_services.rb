@@ -116,9 +116,9 @@ class UniqueService < Services::Base
   def call(on_error, sleep)
     check_uniqueness on_error: on_error
     do_work
-    # Sleep 5 seconds, this needs to be at least the time
+    # Sleep 6 seconds, this needs to be at least the time
     # between Sidekiq's "heartbeats", which occur every 5 seconds.
-    sleep 5 if sleep
+    sleep 6 if sleep
   end
   def do_work; end
 end
@@ -127,9 +127,9 @@ class UniqueWithCustomArgsService < Services::Base
   def call(uniqueness_arg1, uniqueness_arg2, ignore_arg, on_error, sleep)
     check_uniqueness uniqueness_arg1, uniqueness_arg2, on_error: on_error
     do_work
-    # Sleep 5 seconds, this needs to be at least the time
+    # Sleep 6 seconds, this needs to be at least the time
     # between Sidekiq's "heartbeats", which occur every 5 seconds.
-    sleep 5 if sleep
+    sleep 6 if sleep
   end
   def do_work; end
 end
@@ -140,9 +140,9 @@ class UniqueMultipleService < Services::Base
       check_uniqueness arg, on_error: on_error
     end
     do_work
-    # Sleep 5 seconds, this needs to be at least the time
+    # Sleep 6 seconds, this needs to be at least the time
     # between Sidekiq's "heartbeats", which occur every 5 seconds.
-    sleep 5 if sleep
+    sleep 6 if sleep
   end
   def do_work; end
 end
@@ -150,9 +150,9 @@ end
 class NonUniqueService < Services::Base
   def call(on_error, sleep)
     do_work
-    # Sleep 5 seconds, this needs to be at least the time
+    # Sleep 6 seconds, this needs to be at least the time
     # between Sidekiq's "heartbeats", which occur every 5 seconds.
-    sleep 5 if sleep
+    sleep 6 if sleep
   end
   def do_work; end
 end
