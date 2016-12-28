@@ -1,4 +1,5 @@
 language: ruby
+sudo: false
 rvm:
   - 2.2.5
   - 2.3.1
@@ -13,4 +14,12 @@ gemfile:
   - gemfiles/rails_4.1.gemfile
   - gemfiles/rails_4.2.gemfile
   - gemfiles/rails_5.0.gemfile
-sudo: false
+matrix:
+  exclude:
+    - rvm: 2.4.0
+      gemfile: gemfiles/rails_4.0.gemfile
+    - rvm: 2.4.0
+      gemfile: gemfiles/rails_4.1.gemfile
+  allow_failures:
+    - rvm: 2.4.0
+      gemfile: gemfiles/rails_4.2.gemfile
