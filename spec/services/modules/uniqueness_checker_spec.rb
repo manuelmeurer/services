@@ -57,7 +57,7 @@ shared_examples 'checking the uniqueness properly' do
           fail_args.each do |fail_arg_group|
             service = service_class.new
             expect(service).to_not receive(:do_work)
-            expect(service_class).to receive(:call_in).with(an_instance_of(Fixnum), *fail_arg_group, 'reschedule', false)
+            expect(service_class).to receive(:call_in).with(an_instance_of(Integer), *fail_arg_group, 'reschedule', false)
             expect { service.call(*fail_arg_group, 'reschedule', false) }.to_not raise_error
           end
         end

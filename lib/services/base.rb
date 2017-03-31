@@ -34,9 +34,9 @@ module Services
 
     def _split_ids_and_objects(ids_or_objects, klass)
       ids_or_objects = Array(ids_or_objects)
-      ids, objects = ids_or_objects.grep(Fixnum), ids_or_objects.grep(klass)
+      ids, objects = ids_or_objects.grep(Integer), ids_or_objects.grep(klass)
       if ids.size + objects.size < ids_or_objects.size
-        raise "All params must be either #{klass.to_s.pluralize} or Fixnums: #{ids_or_objects.map { |id_or_object| [id_or_object.class, id_or_object.inspect].join(' - ')}}"
+        raise "All params must be either #{klass.to_s.pluralize} or Integers: #{ids_or_objects.map { |id_or_object| [id_or_object.class, id_or_object.inspect].join(' - ')}}"
       end
       [ids, objects]
     end

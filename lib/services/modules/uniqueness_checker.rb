@@ -80,7 +80,7 @@ module Services
           arg.map do |array_arg|
             convert_for_rescheduling array_arg
           end
-        when Fixnum, String, TrueClass, FalseClass, NilClass
+        when Integer, String, TrueClass, FalseClass, NilClass
           arg
         when object_class
           arg.id
