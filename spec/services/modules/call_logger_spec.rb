@@ -13,7 +13,7 @@ describe Services::Base::CallLogger do
         meta: {
           caller:  a_string_matching(caller_regex),
           service: service.class.to_s,
-          id:      an_instance_of(String)
+          id:      a_kind_of(String)
         },
         severity: 'info'
       )
@@ -22,7 +22,7 @@ describe Services::Base::CallLogger do
         meta: {
           duration: a_value_within(0.1).of(0.0),
           service:  service.class.to_s,
-          id:       an_instance_of(String)
+          id:       a_kind_of(String)
         },
         severity: 'info'
       )
