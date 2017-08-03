@@ -12,7 +12,7 @@ module Services
         subclass.const_set :Error, Class.new(StandardError)
         subclass.public_send :include, Rails.application.routes.url_helpers if defined?(Rails)
         subclass.public_send :include, Asyncable if defined?(Asyncable)
-        subclass.public_send :prepend, CallLogger, ExceptionWrapper, UniquenessChecker
+        subclass.public_send :prepend, CallLogger, ExceptionWrapper, UniquenessChecker, ForgiveFailures
       end
 
       delegate :call, to: :new
