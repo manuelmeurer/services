@@ -22,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'rake',            '>= 0.9.0'
   gem.add_development_dependency 'guard-rspec',     '~> 4.2'
   gem.add_development_dependency 'rspec',           '~> 3.0'
-  gem.add_development_dependency 'sidekiq',         '~> 4.0'
+  gem.add_development_dependency 'sidekiq',         '~> 5.0'
   gem.add_development_dependency 'redis',           '~> 3.0'
   gem.add_development_dependency 'redis-namespace', '~> 1.5'
   gem.add_development_dependency 'tries',           '~> 0.3'
