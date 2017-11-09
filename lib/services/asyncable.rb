@@ -1,4 +1,5 @@
 require 'active_support/concern'
+require 'global_id'
 
 begin
   require 'sidekiq'
