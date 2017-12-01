@@ -14,10 +14,19 @@ module Services
       end
     end
 
-    def call(ids = [], conditions = {})
-      raise ArgumentError, 'ids parameter must not be nil.' if ids.nil?
+    def call(ids_or_conditions, _conditions = {})
+      ids, conditions = if ids_or_conditions.is_a?(Hash)
+        if _conditions.any?
+          fail ArgumentError, 'If conditions are passed as first argument, there must not be a second argument.'
+        end
+        [[], ids_or_conditions.symbolize_keys]
+      else
+        if ids_or_conditions.nil?
+          fail ArgumentError, 'IDs must not be nil.'
+        end
+        [Array(ids_or_conditions), _conditions.symbolize_keys]
+      end
 
-      ids, conditions = Array(ids), conditions.symbolize_keys
       object_table_id = "#{object_class.table_name}.id"
 
       special_conditions = conditions.extract!(:order, :limit, :page, :per_page)

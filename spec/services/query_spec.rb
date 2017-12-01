@@ -22,4 +22,12 @@ describe Services::Query do
       end
     end
   end
+
+  describe 'calling without IDs parameter' do
+    let(:post) { Post.create! title: 'Superpost!' }
+
+    it 'works' do
+      expect(Services::Posts::Find.call title: post.title).to eq([post])
+    end
+  end
 end
