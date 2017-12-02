@@ -29,7 +29,7 @@ module Services
 
       object_table_id = "#{object_class.table_name}.id"
 
-      special_conditions = conditions.extract!(:order, :limit, :page, :per_page)
+      special_conditions = conditions.extract!(:id_not, :order, :limit, :page, :per_page)
       special_conditions[:order] = object_table_id unless special_conditions.has_key?(:order)
 
       scope = conditions.delete(:scope).try(:dup) || object_class.public_send(ActiveRecord::VERSION::MAJOR == 3 ? :scoped : :all)
@@ -60,6 +60,8 @@ module Services
 
       special_conditions.each do |k, v|
         case k
+        when :id_not
+          scope = scope.where.not(id: v)
         when :order
           next unless v
           order = case v
