@@ -14,7 +14,7 @@ module Services
       end
     end
 
-    def call(ids_or_conditions, _conditions = {})
+    def call(ids_or_conditions = {}, _conditions = {})
       ids, conditions = if ids_or_conditions.is_a?(Hash)
         if _conditions.any?
           fail ArgumentError, 'If conditions are passed as first argument, there must not be a second argument.'
