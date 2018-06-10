@@ -64,10 +64,26 @@ module Services
           scope = scope.where.not(id: v)
         when :order
           next unless v
-          order = case v
-          when 'random' then 'RANDOM()'
-          when /\./     then v
-          else               "#{object_class.table_name}.#{v}"
+          case v
+          when 'random'
+            order = 'RANDOM()'
+          when /\A([A-Za-z0-9_]+)\./
+            table_name = $1
+            unless table_name == object_class.table_name
+              unless reflection = object_class.reflections.values.detect { |reflection| reflection.table_name == table_name }
+                fail "Reflection on class #{object_class} with table name #{table_name} not found."
+              end
+              # TODO: In Rails 5, we can use #left_outer_joins
+              # http://blog.bigbinary.com/2016/03/24/support-for-left-outer-joins-in-rails-5.html
+              join_conditions = "LEFT OUTER JOIN #{table_name} ON #{table_name}.#{reflection.foreign_key} = #{object_class.table_name}.id"
+              if reflection.type
+                join_conditions << " AND #{table_name}.#{reflection.type} = '#{object_class}'"
+              end
+              scope = scope.joins(join_conditions)
+            end
+            order = v
+          else
+            order = "#{object_class.table_name}.#{v}"
           end
           scope = scope.order(order)
         when :limit
