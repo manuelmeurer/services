@@ -29,8 +29,9 @@ module Services
 
       object_table_id = "#{object_class.table_name}.id"
 
-      special_conditions = conditions.extract!(:id_not, :order, :limit, :page, :per_page)
-      special_conditions[:order] = object_table_id unless special_conditions.has_key?(:order)
+      unless conditions.key?(:order)
+        conditions[:order] = object_table_id
+      end
 
       scope = conditions.delete(:scope).try(:dup) || object_class.public_send(ActiveRecord::VERSION::MAJOR == 3 ? :scoped : :all)
       scope = scope.where(object_table_id => ids) unless ids.empty?
@@ -50,18 +51,26 @@ module Services
           end
         end
 
-        scope = process(scope, conditions)
+        conditions.each do |k, v|
+          if new_scope = process(scope, k, v)
+            conditions.delete k
+            scope = new_scope
+          end
+        end
 
-        # If a JOIN is involved, use a subquery to make sure we're getting DISTINCT records.
+        # If a JOIN is involved, use a subquery to make sure we get DISTINCT records.
         if scope.to_sql =~ / join /i
           scope = object_class.where(id: scope.select("DISTINCT #{object_table_id}"))
         end
       end
 
-      special_conditions.each do |k, v|
+      conditions.each do |k, v|
         case k
         when :id_not
           scope = scope.where.not(id: v)
+        when /\Acreated_(before|after)\z/
+          operator = $1 == 'before' ? '<' : '>'
+          scope = scope.where("created_at #{operator} ?", v)
         when :order
           next unless v
           case v
@@ -93,7 +102,7 @@ module Services
         when :per_page
           scope = scope.per(v)
         else
-          raise ArgumentError, "Unexpected special condition: #{k}"
+          raise ArgumentError, "Unexpected condition: #{k}"
         end
       end
 

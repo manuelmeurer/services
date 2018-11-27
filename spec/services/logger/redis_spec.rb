@@ -45,7 +45,7 @@ describe Services::Logger::Redis do
       %i(message severity).each do |k|
         log[k] = log[k].try(:to_s) || ''
       end
-      log[:meta] = if log.has_key?(:meta)
+      log[:meta] = if log.key?(:meta)
         log[:meta].stringify_keys
       else
         {}
@@ -59,7 +59,7 @@ describe Services::Logger::Redis do
       Timecop.freeze log[:time] do
         args = [log[:message]]
         args.push log[:meta] || {}
-        args.push log[:severity] if log.has_key?(:severity)
+        args.push log[:severity] if log.key?(:severity)
         logger.log *args
       end
     end
