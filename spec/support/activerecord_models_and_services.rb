@@ -30,7 +30,9 @@ module Services
       private
 
       def process(scope, condition, value)
-        raise({ condition => value }.to_json)
+        if condition == :comment_id
+          raise({ condition => value }.to_json)
+        end
       end
     end
   end
