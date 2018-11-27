@@ -29,8 +29,8 @@ module Services
 
       private
 
-      def process(scope, conditions)
-        raise conditions.to_json
+      def process(scope, condition, value)
+        raise({ condition => value }.to_json)
       end
     end
   end
@@ -43,18 +43,13 @@ module Services
 
       private
 
-      def process(scope, conditions)
-        conditions.each do |k, v|
-          case k
-          when :title, :body
-            scope = scope.where(k => v)
-          when :comment_id
-            scope = scope.joins(:comments).where("#{Comment.table_name}.id" => v)
-          else
-            raise ArgumentError, "Unexpected condition: #{k}"
-          end
+      def process(scope, condition, value)
+        case condition
+        when :title, :body
+          scope.where(condition => value)
+        when :comment_id
+          scope.joins(:comments).where("#{Comment.table_name}.id" => value)
         end
-        scope
       end
     end
   end
@@ -67,16 +62,11 @@ module Services
 
       private
 
-      def process(scope, conditions)
-        conditions.each do |k, v|
-          case k
-          when :body, :post_id
-            scope = scope.where(k => v)
-          else
-            raise ArgumentError, "Unexpected condition: #{k}"
-          end
+      def process(scope, condition, value)
+        case condition
+        when :body, :post_id
+          scope.where(condition => value)
         end
-        scope
       end
     end
   end

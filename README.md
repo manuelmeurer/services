@@ -148,18 +148,13 @@ module Services
     class Find < Services::Query
       convert_condition_objects_to_ids :post
 
-      private def process(scope, conditions)
-        conditions.each do |k, v|
-          case k
-          when :email, :name
-            scope = scope.where(k => v)
-          when :post_id
-            scope = scope.joins(:posts).where("#{Post.table_name}.id" => v)
-          else
-            raise ArgumentError, "Unexpected condition: #{k}"
-          end
+      private def process(scope, condition, value)
+        case condition
+        when :email, :name
+          scope.where(condition => value)
+        when :post_id
+          scope.joins(:posts).where("#{Post.table_name}.id" => value)
         end
-        scope
       end
     end
   end
