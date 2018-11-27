@@ -70,7 +70,7 @@ module Services
           scope = scope.where.not(id: v)
         when /\Acreated_(before|after)\z/
           operator = $1 == 'before' ? '<' : '>'
-          scope = scope.where("created_at #{operator} ?", v)
+          scope = scope.where("#{object_class.table_name}.created_at #{operator} ?", v)
         when :order
           next unless v
           case v
