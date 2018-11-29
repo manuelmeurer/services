@@ -173,3 +173,9 @@ class NestedExceptionService < Services::Base
     end
   end
 end
+
+class AsyncService < Services::Base
+  def call(foo, bar: 'baz', pelle:)
+    raise [foo, bar, pelle].to_json
+  end
+end
