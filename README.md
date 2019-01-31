@@ -250,3 +250,9 @@ Or install it yourself as:
 ## Testing
 
 You need Redis to run tests, check out the [Guardfile](Guardfile) which loads it automatically when you start Guard!
+
+## Support
+
+If you like this project, consider buying me a coffee! :)
+
+buymeacoff.ee/279lcDtbF
