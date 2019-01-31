@@ -253,6 +253,4 @@ You need Redis to run tests, check out the [Guardfile](Guardfile) which loads it
 
 ## Support
 
-If you like this project, consider buying me a coffee! :)
-
-buymeacoff.ee/279lcDtbF
+If you like this project, consider [buying me a coffee](https://www.buymeacoffee.com/279lcDtbF)! :)
