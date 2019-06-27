@@ -38,7 +38,8 @@ module Services
       # Since the arguments to `perform` are serialized to the database before Sidekiq picks them up,
       # symbol keys are converted to strings.
       call_method = method(:call)
-      while call_method.owner != self.class
+      # Find the first class that inherits from `Services::Base`.
+      while !(call_method.owner < Services::Base)
         call_method = call_method.super_method
       end
       if call_method.parameters.map(&:first).grep(/\Akey/).any? && args.last.is_a?(Hash)
