@@ -2,6 +2,8 @@ module Services
   class Query
     include ObjectClass
 
+    CREATED_BEFORE_AFTER_REGEX = /\Acreated_(before|after)\z/
+
     class << self
       delegate :call, to: :new
 
@@ -33,10 +35,12 @@ module Services
         conditions[:order] = object_table_id
       end
 
-      scope = conditions.delete(:scope).try(:dup) || object_class.public_send(ActiveRecord::VERSION::MAJOR == 3 ? :scoped : :all)
-      scope = scope.where(object_table_id => ids) unless ids.empty?
+      scope = conditions.delete(:scope).try(:dup) || object_class.all
+      if ids.any?
+        scope = scope.where(object_table_id => ids)
+      end
 
-      unless conditions.empty?
+      if conditions.any?
         self.class.object_to_id_class_names.each do |class_name|
           if object_or_objects = conditions.delete(class_name)
             ids = case object_or_objects
@@ -68,7 +72,7 @@ module Services
         case k
         when :id_not
           scope = scope.where.not(id: v)
-        when /\Acreated_(before|after)\z/
+        when CREATED_BEFORE_AFTER_REGEX
           operator = $1 == 'before' ? '<' : '>'
           scope = scope.where("#{object_class.table_name}.created_at #{operator} ?", v)
         when :order
