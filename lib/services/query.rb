@@ -2,6 +2,8 @@ module Services
   class Query
     include ObjectClass
 
+    COMMA_REGEX                = /\s*,\s*/
+    TABLE_NAME_REGEX           = /\A([A-Za-z0-9_]+)\./
     CREATED_BEFORE_AFTER_REGEX = /\Acreated_(before|after)\z/
 
     class << self
@@ -77,27 +79,31 @@ module Services
           scope = scope.where("#{object_class.table_name}.created_at #{operator} ?", v)
         when :order
           next unless v
-          case v
-          when 'random'
-            order = 'RANDOM()'
-          when /\A([A-Za-z0-9_]+)\./
-            table_name = $1
-            unless table_name == object_class.table_name
+
+          order = v.split(COMMA_REGEX).map do |order_part|
+            table_name = order_part[TABLE_NAME_REGEX, 1]
+            case
+            when table_name && table_name != object_class.table_name
               unless reflection = object_class.reflections.values.detect { |reflection| reflection.table_name == table_name }
                 fail "Reflection on class #{object_class} with table name #{table_name} not found."
               end
-              # TODO: In Rails 5, we can use #left_outer_joins
-              # http://blog.bigbinary.com/2016/03/24/support-for-left-outer-joins-in-rails-5.html
-              join_conditions = "LEFT OUTER JOIN #{table_name} ON #{table_name}.#{reflection.foreign_key} = #{object_class.table_name}.id"
-              if reflection.type
-                join_conditions << " AND #{table_name}.#{reflection.type} = '#{object_class}'"
+
+              if ActiveRecord::VERSION::MAJOR >= 5
+                scope = scope.left_outer_joins(reflection.name)
+              else
+                join_conditions = "LEFT OUTER JOIN #{table_name} ON #{table_name}.#{reflection.foreign_key} = #{object_class.table_name}.id"
+                if reflection.type
+                  join_conditions << " AND #{table_name}.#{reflection.type} = '#{object_class}'"
+                end
+                scope = scope.joins(join_conditions)
               end
-              scope = scope.joins(join_conditions)
+
+              order = order_part
+            when !table_name
+              order = "#{object_class.table_name}.#{order_part}"
             end
-            order = v
-          else
-            order = "#{object_class.table_name}.#{v}"
-          end
+          end.join(', ')
+
           scope = scope.order(order)
         when :limit
           scope = scope.limit(v)
