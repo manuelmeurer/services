@@ -97,11 +97,10 @@ module Services
                 end
                 scope = scope.joins(join_conditions)
               end
-
-              order = order_part
             when !table_name
-              order = "#{object_class.table_name}.#{order_part}"
+              order_part.prepend "#{object_class.table_name}."
             end
+            order_part
           end.join(', ')
 
           scope = scope.order(order)
