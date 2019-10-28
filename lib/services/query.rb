@@ -49,7 +49,7 @@ module Services
             when Array
               object_or_objects.map(&:id)
             when ActiveRecord::Relation
-              object_or_objects.pluck(:id)
+              object_or_objects.select(:id)
             else
               [object_or_objects.id]
             end
