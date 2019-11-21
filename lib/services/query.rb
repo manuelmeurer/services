@@ -71,47 +71,64 @@ module Services
       end
 
       conditions.each do |k, v|
-        case k
-        when :id_not
-          scope = scope.where.not(id: v)
-        when CREATED_BEFORE_AFTER_REGEX
-          operator = $1 == 'before' ? '<' : '>'
-          scope = scope.where("#{object_class.table_name}.created_at #{operator} ?", v)
-        when :order
-          next unless v
-
-          order = v.split(COMMA_REGEX).map do |order_part|
-            table_name = order_part[TABLE_NAME_REGEX, 1]
-            case
-            when table_name && table_name != object_class.table_name
-              unless reflection = object_class.reflections.values.detect { |reflection| reflection.table_name == table_name }
-                fail "Reflection on class #{object_class} with table name #{table_name} not found."
-              end
-
-              if ActiveRecord::VERSION::MAJOR >= 5
-                scope = scope.left_outer_joins(reflection.name)
-              else
-                join_conditions = "LEFT OUTER JOIN #{table_name} ON #{table_name}.#{reflection.foreign_key} = #{object_class.table_name}.id"
-                if reflection.type
-                  join_conditions << " AND #{table_name}.#{reflection.type} = '#{object_class}'"
-                end
-                scope = scope.joins(join_conditions)
-              end
-            when !table_name
-              order_part.prepend "#{object_class.table_name}."
+        if (Services.configuration.allowed_class_methods_in_queries[object_class.to_s] || []).include?(k)
+          case object_class.method(k).arity
+          when 0
+            unless v == true
+              raise ArgumentError, "Method #{k} of class #{self} takes no arguments, so `true` must be passed as the value for this param, not #{v} (#{v.class})."
             end
-            order_part
-          end.join(', ')
-
-          scope = scope.order(order)
-        when :limit
-          scope = scope.limit(v)
-        when :page
-          scope = scope.page(v)
-        when :per_page
-          scope = scope.per(v)
+            scope = scope.public_send(k)
+          when 1, -1
+            scope = scope.public_send(k, v)
+          else
+            unless v.is_a?(Array)
+              raise ArgumentError, "Method #{k} of class #{self} takes more than one argument, so an array must be passed as the value for this param, not #{v} (#{v.class})."
+            end
+            scope = scope.public_send(k, *v)
+          end
         else
-          raise ArgumentError, "Unexpected condition: #{k}"
+          case k
+          when :id_not
+            scope = scope.where.not(id: v)
+          when CREATED_BEFORE_AFTER_REGEX
+            operator = $1 == 'before' ? '<' : '>'
+            scope = scope.where("#{object_class.table_name}.created_at #{operator} ?", v)
+          when :order
+            next unless v
+
+            order = v.split(COMMA_REGEX).map do |order_part|
+              table_name = order_part[TABLE_NAME_REGEX, 1]
+              case
+              when table_name && table_name != object_class.table_name
+                unless reflection = object_class.reflections.values.detect { |reflection| reflection.table_name == table_name }
+                  fail "Reflection on class #{object_class} with table name #{table_name} not found."
+                end
+
+                if ActiveRecord::VERSION::MAJOR >= 5
+                  scope = scope.left_outer_joins(reflection.name)
+                else
+                  join_conditions = "LEFT OUTER JOIN #{table_name} ON #{table_name}.#{reflection.foreign_key} = #{object_class.table_name}.id"
+                  if reflection.type
+                    join_conditions << " AND #{table_name}.#{reflection.type} = '#{object_class}'"
+                  end
+                  scope = scope.joins(join_conditions)
+                end
+              when !table_name
+                order_part.prepend "#{object_class.table_name}."
+              end
+              order_part
+            end.join(', ')
+
+            scope = scope.order(order)
+          when :limit
+            scope = scope.limit(v)
+          when :page
+            scope = scope.page(v)
+          when :per_page
+            scope = scope.per(v)
+          else
+            raise ArgumentError, "Unexpected condition: #{k}"
+          end
         end
       end
 
