@@ -71,8 +71,10 @@ module Services
       end
 
       conditions.each do |k, v|
-        if (Services.configuration.allowed_class_methods_in_queries[object_class.to_s] || []).include?(k)
-          case object_class.method(k).arity
+        allowed_class_methods = Services.configuration.allowed_class_methods_in_queries[object_class.to_s]
+        if allowed_class_methods&.key?(k)
+          arity = allowed_class_methods[k] || object_class.method(k).arity
+          case arity
           when 0
             unless v == true
               raise ArgumentError, "Method #{k} of class #{self} takes no arguments, so `true` must be passed as the value for this param, not #{v} (#{v.class})."

@@ -18,8 +18,8 @@ module Services
     @redis ||= self.configuration.redis || (defined?(Redis.current) && Redis.current) or fail RedisNotFound, 'Redis not configured.'
   end
 
-  def self.allow_class_method_in_queries(klass, method)
-    (configuration.allowed_class_methods_in_queries[klass.to_s] ||= Set.new) << method.to_sym
+  def self.allow_class_method_in_queries(klass, method, arity = nil)
+    (configuration.allowed_class_methods_in_queries[klass.to_s] ||= {})[method.to_sym] = arity
   end
 end
 
