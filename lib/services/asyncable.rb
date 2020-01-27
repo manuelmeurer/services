@@ -1,13 +1,6 @@
 require 'active_support/concern'
 require 'global_id'
 
-begin
-  require 'sidekiq'
-  require 'sidekiq/api'
-rescue LoadError
-  raise Services::BackgroundProcessorNotFound
-end
-
 module Services
   module Asyncable
     extend ActiveSupport::Concern
@@ -15,7 +8,22 @@ module Services
     ASYNC_METHOD_SUFFIXES = %i(async in at).freeze
 
     included do
-      include Sidekiq::Worker
+      begin
+        require 'sidekiq'
+        require 'sidekiq/api'
+      rescue LoadError
+      else
+        include Sidekiq::Worker
+        return
+      end
+
+      begin
+        require 'sucker_punch'
+      rescue LoadError
+        raise Services::NoBackgroundProcessorFound
+      else
+        include SuckerPunch::Job
+      end
     end
 
     module ClassMethods
@@ -33,18 +41,22 @@ module Services
       args = args.map do |arg|
         GlobalID::Locator.locate(arg) || arg
       end
+
       # If the `call` method takes any kwargs and the last argument is a hash, symbolize the hash keys,
       # otherwise they won't be recognized as kwards when splatted.
       # Since the arguments to `perform` are serialized to the database before Sidekiq picks them up,
       # symbol keys are converted to strings.
       call_method = method(:call)
+
       # Find the first class that inherits from `Services::Base`.
       while !(call_method.owner < Services::Base)
         call_method = call_method.super_method
       end
+
       if call_method.parameters.map(&:first).grep(/\Akey/).any? && args.last.is_a?(Hash)
         args.last.symbolize_keys!
       end
+
       call *args
     end
   end

@@ -11,7 +11,10 @@ module Services
       def inherited(subclass)
         subclass.const_set :Error, Class.new(StandardError)
         subclass.public_send :include, Rails.application.routes.url_helpers if defined?(Rails)
-        subclass.public_send :include, Asyncable if defined?(Asyncable)
+        begin
+          subclass.public_send :include, Asyncable
+        rescue Services::NoBackgroundProcessorFound
+        end
         subclass.public_send :prepend, CallLogger, ExceptionWrapper, UniquenessChecker
       end
 

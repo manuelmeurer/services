@@ -5,8 +5,8 @@ require_relative 'services/logger/null'
 module Services
   include GemConfig::Base
 
-  BackgroundProcessorNotFound = Class.new(StandardError)
-  RedisNotFound               = Class.new(StandardError)
+  NoBackgroundProcessorFound = Class.new(StandardError)
+  RedisNotFound              = Class.new(StandardError)
 
   with_configuration do
     has :logger, default: Services::Logger::Null.new
@@ -26,10 +26,7 @@ end
 require_relative 'services/version'
 require_relative 'services/logger/file'
 require_relative 'services/logger/redis'
-begin
-  require_relative 'services/asyncable'
-rescue Services::BackgroundProcessorNotFound
-end
+require_relative 'services/asyncable'
 require_relative 'services/modules/call_logger'
 require_relative 'services/modules/exception_wrapper'
 require_relative 'services/modules/object_class'
