@@ -8,21 +8,25 @@ module Services
     ASYNC_METHOD_SUFFIXES = %i(async in at).freeze
 
     included do
+      sidekiq_loaded = false
+
       begin
         require 'sidekiq'
         require 'sidekiq/api'
       rescue LoadError
       else
         include Sidekiq::Worker
-        return
+        sidekiq_loaded = true
       end
 
-      begin
-        require 'sucker_punch'
-      rescue LoadError
-        raise Services::NoBackgroundProcessorFound
-      else
-        include SuckerPunch::Job
+      unless sidekiq_loaded
+        begin
+          require 'sucker_punch'
+        rescue LoadError
+          raise Services::NoBackgroundProcessorFound
+        else
+          include SuckerPunch::Job
+        end
       end
     end
 
