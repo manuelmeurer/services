@@ -1,8 +1,8 @@
 # Services
 
 [![Gem Version](https://badge.fury.io/rb/services.png)](http://badge.fury.io/rb/services)
-[![Build Status](https://secure.travis-ci.org/krautcomputing/services.png)](http://travis-ci.org/krautcomputing/services)
-[![Code Climate](https://codeclimate.com/github/krautcomputing/services.png)](https://codeclimate.com/github/krautcomputing/services)
+[![Build Status](https://secure.travis-ci.org/manuelmeurer/services.png)](http://travis-ci.org/manuelmeurer/services)
+[![Code Climate](https://codeclimate.com/github/manuelmeurer/services.png)](https://codeclimate.com/github/manuelmeurer/services)
 
 Services is a collection of modules and base classes that let you simply add a service layer to your Rails app.
 
@@ -28,7 +28,7 @@ Redis is used at several points, e.g. to store information about the currently r
 
 #### Postgres (optional)
 
-The SQL that `Services::Query` (discussed further down) generates is optimized for Postgres. It might work with other databases but it's not guaranteed. If you're not using Postgres, you can still use all other parts of Services, just don't use `Services::Query` or, even better, submit a [pull request](https://github.com/krautcomputing/services/issues) that fixes it to work with your database!
+The SQL that `Services::Query` (discussed further down) generates is optimized for Postgres. It might work with other databases but it's not guaranteed. If you're not using Postgres, you can still use all other parts of Services, just don't use `Services::Query` or, even better, submit a [pull request](https://github.com/manuelmeurer/services/issues) that fixes it to work with your database!
 
 #### Sidekiq (optional)
 

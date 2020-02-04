@@ -11,7 +11,7 @@ Gem::Specification.new do |gem|
   gem.email                 = 'manuel@krautcomputing.com'
   gem.summary               = 'A nifty service layer for your Rails app'
   gem.description           = 'A nifty service layer for your Rails app'
-  gem.homepage              = 'http://krautcomputing.github.io/services'
+  gem.homepage              = 'http://manuelmeurer.github.io/services'
   gem.license               = 'MIT'
   gem.required_ruby_version = '>= 2.2.5'
   gem.files                 = `git ls-files`.split($/)
