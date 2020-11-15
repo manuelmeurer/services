@@ -14,7 +14,7 @@ module Services
       ).freeze
 
       MAX_RETRIES = 10.freeze
-      ONE_DAY     = (60 * 60 * 24).freeze
+      30_DAYS     = (60 * 60 * 24 * 30).freeze
 
       def self.prepended(mod)
         mod.const_set :NotUniqueError, Class.new(mod::Error)
@@ -37,7 +37,7 @@ module Services
         else
           @_uniqueness_keys ||= []
           @_uniqueness_keys << new_uniqueness_key
-          Services.redis.setex new_uniqueness_key, ONE_DAY, @id
+          Services.redis.setex new_uniqueness_key, 30_DAYS, @id
           true
         end
       end
@@ -103,7 +103,7 @@ module Services
       end
 
       def increase_error_count
-        Services.redis.setex error_count_key, retry_delay + ONE_DAY, error_count + 1
+        Services.redis.setex error_count_key, retry_delay + 30_DAYS, error_count + 1
       end
 
       def uniqueness_key(args)
