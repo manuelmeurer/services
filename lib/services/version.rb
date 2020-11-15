@@ -1,3 +1,3 @@
 module Services
-  VERSION = '7.3.1'.freeze
+  VERSION = '7.3.2'.freeze
 end
