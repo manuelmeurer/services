@@ -27,9 +27,9 @@ module Services
         end
       end
 
-      def call(*args)
+      def call(*args, **kwargs)
         unless self.class.call_logging_disabled
-          log "START with args: #{args}", caller: caller
+          log "START with args: #{args}, kwargs: #{kwargs}", caller: caller
           start = Time.now
         end
         begin

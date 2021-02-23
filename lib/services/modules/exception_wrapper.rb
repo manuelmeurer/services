@@ -1,7 +1,7 @@
 module Services
   class Base
     module ExceptionWrapper
-      def call(*args)
+      def call(*args, **kwargs)
         super
       rescue StandardError => e
         if e.class <= self.class::Error

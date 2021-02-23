@@ -46,10 +46,6 @@ module Services
         GlobalID::Locator.locate(arg) || arg
       end
 
-      # If the `call` method takes any kwargs and the last argument is a hash, symbolize the hash keys,
-      # otherwise they won't be recognized as kwards when splatted.
-      # Since the arguments to `perform` are serialized to the database before Sidekiq picks them up,
-      # symbol keys are converted to strings.
       call_method = method(:call)
 
       # Find the first class that inherits from `Services::Base`.
@@ -57,11 +53,14 @@ module Services
         call_method = call_method.super_method
       end
 
-      if call_method.parameters.map(&:first).grep(/\Akey/).any? && args.last.is_a?(Hash)
-        args.last.symbolize_keys!
+      # If the `call` method takes any kwargs and the last argument is a hash, pass them to the method as kwargs.
+      kwargs = if call_method.parameters.map(&:first).grep(/\Akey/).any? && args.last.is_a?(Hash)
+        args.pop.symbolize_keys
+      else
+        {}
       end
 
-      call *args
+      call *args, **kwargs
     end
   end
 end

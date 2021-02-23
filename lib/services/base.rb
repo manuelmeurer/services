@@ -25,7 +25,7 @@ module Services
       @id = SecureRandom.hex(6)
     end
 
-    def call(*args)
+    def call(*args, **kwargs)
       raise NotImplementedError
     end
 

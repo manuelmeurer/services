@@ -42,7 +42,7 @@ module Services
         end
       end
 
-      def call(*args)
+      def call(*args, **kwargs)
         @_service_args = args
         super
       rescue self.class::NotUniqueError => e

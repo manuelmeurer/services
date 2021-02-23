@@ -81,14 +81,14 @@ module Services
 end
 
 class EmptyService < Services::Base
-  def call(*args)
+  def call(*args, **kwargs)
   end
 end
 
 class EmptyServiceWithoutCallLogging < Services::Base
   disable_call_logging
 
-  def call(*args)
+  def call(*args, **kwargs)
   end
 end
 
