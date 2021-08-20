@@ -34,7 +34,7 @@ module Services
       ASYNC_METHOD_SUFFIXES.each do |async_method_suffix|
         define_method "call_#{async_method_suffix}" do |*args|
           args = args.map do |arg|
-            arg.respond_to?(:to_global_id) ? arg.to_global_id : arg
+            arg.respond_to?(:to_global_id) ? arg.to_global_id.to_s : arg
           end
           self.public_send "perform_#{async_method_suffix}", *args
         end
