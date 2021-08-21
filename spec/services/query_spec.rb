@@ -16,7 +16,7 @@ describe Services::Query do
       {
         comment     => comment.id,
         comments    => comments.map(&:id),
-        Comment.all => Comment.all.pluck(:id)
+        Comment.all => Comment.all.map { |comment| { id: comment.id } }
       }.each do |condition_before, condition_after|
         expect { Services::Posts::FindRaiseConditions.call [], comment: condition_before }.to raise_error({ comment_id: condition_after }.to_json)
       end

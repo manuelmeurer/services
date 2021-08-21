@@ -9,7 +9,7 @@ describe Services::Base::CallLogger do
       service.call *args
       caller_regex = /\A#{Regexp.escape __FILE__}:\d+\z/
       expect(logs.first).to match(
-        message:  "START with args: #{args}",
+        message:  "START with args: #{args}, kwargs: {}",
         meta: {
           caller:  a_string_matching(caller_regex),
           service: service.class.to_s,
