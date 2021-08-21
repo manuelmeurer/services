@@ -1,6 +1,7 @@
 # Services
 
 [![Gem Version](https://badge.fury.io/rb/services.png)](http://badge.fury.io/rb/services)
+[![CI](https://github.com/manuelmeurer/services/actions/workflows/ci.yml/badge.svg)](https://github.com/manuelmeurer/services/actions/workflows/ci.yml)
 
 Services is a collection of modules and base classes that let you simply add a service layer to your Rails app.
 

@@ -1,0 +1,44 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+
+    env:
+      RAILS_ENV: test
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby_version:
+          - 3.0
+          - 2.7
+          - 2.6
+
+    services:
+
+      redis:
+        image: redis
+        options: --entrypoint redis-server
+        ports:
+          - 6379:6379
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby_version }}
+          bundler-cache: true
+
+      - name: Install gems
+        run: bundle exec appraisal install
+
+      - name: Run tests
+        run: bundle exec appraisal rspec
