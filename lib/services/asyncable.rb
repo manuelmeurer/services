@@ -33,18 +33,14 @@ module Services
     module ClassMethods
       ASYNC_METHOD_SUFFIXES.each do |async_method_suffix|
         define_method "call_#{async_method_suffix}" do |*args|
-          args = args.map do |arg|
-            arg.respond_to?(:to_global_id) ? arg.to_global_id.to_s : arg
-          end
+          args = args.map(&Services.method(:replace_records_with_global_ids))
           self.public_send "perform_#{async_method_suffix}", *args
         end
       end
     end
 
     def perform(*args)
-      args = args.map do |arg|
-        GlobalID::Locator.locate(arg) || arg
-      end
+      args = args.map(&Services.method(:replace_global_ids_with_records))
 
       call_method = method(:call)
 
