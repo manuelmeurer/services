@@ -17,9 +17,9 @@ For disambiguation: in this README, when you read "Services" with a uppercase "S
 
 ### Requirements
 
-#### Ruby >= 2.2.5
+#### Ruby >= 2.7
 
-#### Rails >= 5.2
+#### Rails >= 6.0
 
 #### Redis >= 3.0
 

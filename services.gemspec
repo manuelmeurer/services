@@ -19,7 +19,7 @@ Gem::Specification.new do |gem|
   gem.description           = 'A nifty service layer for your Rails app'
   gem.homepage              = 'https://manuelmeurer.com/services/'
   gem.license               = 'MIT'
-  gem.required_ruby_version = '>= 2.6'
+  gem.required_ruby_version = '>= 2.7'
   gem.files                 = files - test_files
   gem.executables           = gem.files.grep(%r(\Abin/)).map(&File.method(:basename))
   gem.test_files            = test_files
@@ -35,6 +35,6 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency 'timecop',         '~> 0.7'
   gem.add_development_dependency 'sqlite3',         '~> 1.3'
   gem.add_development_dependency 'appraisal',       '~> 2.1'
-  gem.add_runtime_dependency     'rails',           '>= 5.2'
+  gem.add_runtime_dependency     'rails',           '>= 6.0'
   gem.add_runtime_dependency     'gem_config',      '~> 0.3'
 end

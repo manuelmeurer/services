@@ -16,7 +16,6 @@ jobs:
         ruby_version:
           - 3.0
           - 2.7
-          - 2.6
 
     services:
 
