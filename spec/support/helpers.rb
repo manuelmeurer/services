@@ -20,15 +20,15 @@ def wait_for_all_jobs_to_finish
   end
 end
 
-def wait_for_job_to_run(job_class, *args, &block)
-  job_class.call_async(*args).tap do |jid|
+def wait_for_job_to_run(job_class, *args, **kwargs, &block)
+  job_class.call_async(*args, **kwargs).tap do |jid|
     wait_for { worker_with_jid(jid) }
     block.call if block_given?
   end
 end
 
-def wait_for_job_to_run_and_finish(job_class, *args, &block)
-  wait_for_job_to_run(job_class, *args, &block).tap do |jid|
+def wait_for_job_to_run_and_finish(job_class, *args, **kwargs, &block)
+  wait_for_job_to_run(job_class, *args, **kwargs, &block).tap do |jid|
     wait_for { worker_with_jid(jid).nil? }
   end
 end
