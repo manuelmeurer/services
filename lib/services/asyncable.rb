@@ -56,6 +56,10 @@ module Services
         {}
       end
 
+      # Save args and kwargs in ivars so they can be used
+      # in the service, i.e. for rescheduling.
+      @_call_args, @_call_kwargs = args, kwargs
+
       call *args, **kwargs
     end
   end
